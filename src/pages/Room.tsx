@@ -186,7 +186,7 @@ const Room = () => {
         </div>
 
         {/* Right: Bulletin + Notes */}
-        <aside className="w-[360px] border-l border-border flex flex-col shrink-0 bg-card/50">
+        <aside className="w-[300px] border-l border-border flex flex-col shrink-0 bg-card/50">
           <GameBulletin logs={gameLogs} className="flex-[2] min-h-0" />
           <div className="flex-1 border-t border-border/40 flex flex-col bg-surface/30">
             <div className="px-4 py-2.5 flex items-center gap-2 border-b border-border/30">
