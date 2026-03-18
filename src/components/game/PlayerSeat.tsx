@@ -145,7 +145,7 @@ const PlayerSeat = ({
             </div>
 
             {/* Player name */}
-            <p className={`text-xs font-semibold text-center mt-2 w-full truncate leading-tight ${
+            <p className={`text-sm font-semibold text-center mt-2.5 w-full truncate leading-tight ${
               isDead ? 'text-destructive/50 line-through' : 'text-foreground/90'
             }`}>
               {player.name}
