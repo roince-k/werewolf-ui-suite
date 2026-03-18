@@ -131,7 +131,7 @@ const Room = () => {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left: Two-row seat layout */}
-        <div className="flex-1 flex flex-col items-center justify-center relative px-6 py-4">
+        <div className="flex-1 flex flex-col items-center justify-center relative px-8 py-6">
           {/* Top row */}
           <div className="flex items-end justify-center gap-5 flex-wrap">
             {topRow.map((player, i) => renderSeat(player, i))}
