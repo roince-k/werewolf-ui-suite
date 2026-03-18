@@ -80,7 +80,7 @@ const PlayerSeat = ({
         onClick={onInspect}
         whileHover={isDead ? {} : { y: -6 }}
         whileTap={isDead ? {} : { scale: 0.97 }}
-        className={`relative w-[100px] cursor-pointer select-none transition-all duration-300 ${
+        className={`relative w-[130px] cursor-pointer select-none transition-all duration-300 ${
           isDead ? 'opacity-40 grayscale' : ''
         }`}
       >
@@ -122,8 +122,8 @@ const PlayerSeat = ({
           </div>
 
           {/* Avatar area */}
-          <div className="pt-7 pb-2 flex flex-col items-center px-2">
-            <div className={`relative w-14 h-14 rounded-full flex items-center justify-center border-2 transition-colors ${
+          <div className="pt-8 pb-2.5 flex flex-col items-center px-3">
+            <div className={`relative w-16 h-16 rounded-full flex items-center justify-center border-2 transition-colors ${
               isDead
                 ? 'border-destructive/40 bg-destructive/10'
                 : isSelected

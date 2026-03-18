@@ -33,10 +33,10 @@ const Room = () => {
   const {
     currentRoom, isReady, setReady, gamePhase, setGamePhase,
     gameLogs, addGameLog, myRole, showRoleReveal, setShowRoleReveal,
-    gameResult, setGameResult, castVote
+    gameResult, setGameResult, castVote, notes, setNotes
   } = useGameStore();
   const [message, setMessage] = useState('');
-  const [showNotes, setShowNotes] = useState(false);
+  const [showNotes, setShowNotes] = useState(false); // keep for header toggle if needed
   const [showInvite, setShowInvite] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
@@ -131,9 +131,9 @@ const Room = () => {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left: Two-row seat layout */}
-        <div className="flex-1 flex flex-col items-center justify-center relative px-6 py-4">
+        <div className="flex-1 flex flex-col items-center justify-center relative px-8 py-6">
           {/* Top row */}
-          <div className="flex items-end justify-center gap-3 flex-wrap">
+          <div className="flex items-end justify-center gap-5 flex-wrap">
             {topRow.map((player, i) => renderSeat(player, i))}
           </div>
 
@@ -141,7 +141,7 @@ const Room = () => {
           <PhaseBanner phase={gamePhase} playerCount={players.length} totalSeats={totalSeats} />
 
           {/* Bottom row */}
-          <div className="flex items-start justify-center gap-3 flex-wrap">
+          <div className="flex items-start justify-center gap-5 flex-wrap">
             {bottomRow.map((player, i) => renderSeat(player, midpoint + i))}
           </div>
 
@@ -185,9 +185,21 @@ const Room = () => {
           </div>
         </div>
 
-        {/* Right: Game Bulletin */}
-        <aside className="w-80 border-l border-border flex flex-col shrink-0 bg-card/50">
-          <GameBulletin logs={gameLogs} className="flex-1" />
+        {/* Right: Bulletin + Notes */}
+        <aside className="w-[360px] border-l border-border flex flex-col shrink-0 bg-card/50">
+          <GameBulletin logs={gameLogs} className="flex-[2] min-h-0" />
+          <div className="flex-1 border-t border-border/40 flex flex-col bg-surface/30">
+            <div className="px-4 py-2.5 flex items-center gap-2 border-b border-border/30">
+              <StickyNote className="w-3.5 h-3.5 text-gold" />
+              <span className="display-title text-xs text-gold tracking-wider">推理笔记</span>
+            </div>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="记录你的推理和怀疑对象..."
+              className="flex-1 input-ritual text-sm resize-none border-0 rounded-none bg-transparent focus:ring-0 px-4 py-3"
+            />
+          </div>
         </aside>
       </div>
 
@@ -273,7 +285,7 @@ const EmptySeat = ({ number, index }: { number: number; index: number }) => (
     animate={{ opacity: 0.35, scale: 1 }}
     transition={{ delay: index * 0.04 }}
   >
-    <div className="w-[100px] rounded-xl border-2 border-dashed border-border/30 bg-surface/20 overflow-hidden">
+    <div className="w-[130px] rounded-xl border-2 border-dashed border-border/30 bg-surface/20 overflow-hidden">
       <div className="pt-7 pb-2 flex flex-col items-center px-2">
         <div className="w-14 h-14 rounded-full border-2 border-dashed border-border/30 flex items-center justify-center">
           <span className="text-base text-muted-foreground/30 tabular-nums font-bold">{number}</span>
