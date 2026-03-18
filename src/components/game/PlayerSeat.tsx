@@ -122,8 +122,8 @@ const PlayerSeat = ({
           </div>
 
           {/* Avatar area */}
-          <div className="pt-8 pb-2.5 flex flex-col items-center px-3">
-            <div className={`relative w-16 h-16 rounded-full flex items-center justify-center border-2 transition-colors ${
+          <div className="pt-10 pb-3 flex flex-col items-center px-3">
+            <div className={`relative w-18 h-18 rounded-full flex items-center justify-center border-2 transition-colors ${
               isDead
                 ? 'border-destructive/40 bg-destructive/10'
                 : isSelected
@@ -145,7 +145,7 @@ const PlayerSeat = ({
             </div>
 
             {/* Player name */}
-            <p className={`text-xs font-semibold text-center mt-2 w-full truncate leading-tight ${
+            <p className={`text-sm font-semibold text-center mt-2.5 w-full truncate leading-tight ${
               isDead ? 'text-destructive/50 line-through' : 'text-foreground/90'
             }`}>
               {player.name}
@@ -158,7 +158,7 @@ const PlayerSeat = ({
           </div>
 
           {/* Temp role tag area */}
-          <div className="px-2 pb-2">
+          <div className="px-3 pb-3">
             {tempRole ? (
               <button
                 onClick={(e) => { e.stopPropagation(); onSetTempRole(null); }}
