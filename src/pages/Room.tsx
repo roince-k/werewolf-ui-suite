@@ -285,7 +285,7 @@ const EmptySeat = ({ number, index }: { number: number; index: number }) => (
     animate={{ opacity: 0.35, scale: 1 }}
     transition={{ delay: index * 0.04 }}
   >
-    <div className="w-[130px] rounded-xl border-2 border-dashed border-border/30 bg-surface/20 overflow-hidden">
+    <div className="w-[clamp(100px,9vw,145px)] rounded-xl border-2 border-dashed border-border/30 bg-surface/20 overflow-hidden">
       <div className="pt-7 pb-2 flex flex-col items-center px-2">
         <div className="w-14 h-14 rounded-full border-2 border-dashed border-border/30 flex items-center justify-center">
           <span className="text-base text-muted-foreground/30 tabular-nums font-bold">{number}</span>
