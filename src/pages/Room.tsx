@@ -82,7 +82,7 @@ const Room = () => {
     setTempRoles(prev => ({ ...prev, [playerId]: role }));
   };
 
-  const renderSeat = (player: ReturnType<typeof allSeats>[number], i: number) => {
+  const renderSeat = (player: typeof allSeats[number], i: number) => {
     if (player) {
       return (
         <PlayerSeat
