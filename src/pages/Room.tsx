@@ -185,9 +185,21 @@ const Room = () => {
           </div>
         </div>
 
-        {/* Right: Game Bulletin */}
-        <aside className="w-80 border-l border-border flex flex-col shrink-0 bg-card/50">
-          <GameBulletin logs={gameLogs} className="flex-1" />
+        {/* Right: Bulletin + Notes */}
+        <aside className="w-[360px] border-l border-border flex flex-col shrink-0 bg-card/50">
+          <GameBulletin logs={gameLogs} className="flex-[2] min-h-0" />
+          <div className="flex-1 border-t border-border/40 flex flex-col bg-surface/30">
+            <div className="px-4 py-2.5 flex items-center gap-2 border-b border-border/30">
+              <StickyNote className="w-3.5 h-3.5 text-gold" />
+              <span className="display-title text-xs text-gold tracking-wider">推理笔记</span>
+            </div>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="记录你的推理和怀疑对象..."
+              className="flex-1 input-ritual text-sm resize-none border-0 rounded-none bg-transparent focus:ring-0 px-4 py-3"
+            />
+          </div>
         </aside>
       </div>
 
