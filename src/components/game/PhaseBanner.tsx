@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Moon, Sun, Swords, Clock } from 'lucide-react';
 import type { GamePhase } from '@/store/gameStore';
@@ -60,10 +61,8 @@ const PhaseBanner = ({ phase, playerCount, totalSeats }: PhaseBannerProps) => {
         } : {}}
         transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
       >
-        {/* Left decorative line */}
         <div className="hidden sm:block w-12 h-px bg-gradient-to-r from-transparent to-border/60" />
 
-        {/* Emoji */}
         <motion.span
           className="text-3xl"
           animate={phase === 'night' ? { rotate: [0, -5, 5, 0] } : phase === 'voting' ? { scale: [1, 1.1, 1] } : { y: [0, -4, 0] }}
@@ -72,7 +71,6 @@ const PhaseBanner = ({ phase, playerCount, totalSeats }: PhaseBannerProps) => {
           {getPhaseEmoji()}
         </motion.span>
 
-        {/* Scrolling text */}
         <div className="flex flex-col items-center min-w-[180px]">
           <AnimatePresence mode="wait">
             <motion.div
@@ -94,37 +92,26 @@ const PhaseBanner = ({ phase, playerCount, totalSeats }: PhaseBannerProps) => {
           </AnimatePresence>
         </div>
 
-        {/* Phase icon */}
         <div className="w-8 h-8 rounded-full bg-background/50 border border-border/40 flex items-center justify-center">
           {getPhaseIcon()}
         </div>
 
-        {/* Right decorative line */}
         <div className="hidden sm:block w-12 h-px bg-gradient-to-l from-transparent to-border/60" />
       </motion.div>
     </div>
   );
 };
 
-/* Cycling text with fade animation */
 const CyclingText = ({ messages, phase }: { messages: string[]; phase: string }) => {
   const [index, setIndex] = useState(0);
 
-  // Need to import useState
-  // Already imported at top level via the component
-
-  return <CyclingTextInner messages={messages} phase={phase} />;
-};
-
-const CyclingTextInner = ({ messages, phase }: { messages: string[]; phase: string }) => {
-  const [index, setIndex] = useState(0);
-
-  // Cycle through messages
-  if (messages.length > 1) {
-    setTimeout(() => {
+  useEffect(() => {
+    if (messages.length <= 1) return;
+    const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % messages.length);
     }, 2500);
-  }
+    return () => clearInterval(timer);
+  }, [messages]);
 
   const getTextColor = () => {
     switch (phase) {
@@ -150,8 +137,5 @@ const CyclingTextInner = ({ messages, phase }: { messages: string[]; phase: stri
     </AnimatePresence>
   );
 };
-
-// Need useState import
-import { useState } from 'react';
 
 export default PhaseBanner;
