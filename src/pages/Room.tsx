@@ -36,7 +36,7 @@ const Room = () => {
     gameResult, setGameResult, castVote, notes, setNotes
   } = useGameStore();
   const [message, setMessage] = useState('');
-  const [showNotes, setShowNotes] = useState(false);
+  const [showNotes, setShowNotes] = useState(false); // keep for header toggle if needed
   const [showInvite, setShowInvite] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
