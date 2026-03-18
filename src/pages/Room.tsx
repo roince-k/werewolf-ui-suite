@@ -131,9 +131,9 @@ const Room = () => {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left: Two-row seat layout */}
-        <div className="flex-1 flex flex-col items-center justify-center relative px-8 py-6">
+        <div className="flex-1 flex flex-col items-center justify-between relative px-4 py-3">
           {/* Top row */}
-          <div className="flex items-end justify-center gap-5 flex-wrap">
+          <div className="flex items-end justify-center gap-[1.5vw] flex-wrap">
             {topRow.map((player, i) => renderSeat(player, i))}
           </div>
 
@@ -141,7 +141,7 @@ const Room = () => {
           <PhaseBanner phase={gamePhase} playerCount={players.length} totalSeats={totalSeats} />
 
           {/* Bottom row */}
-          <div className="flex items-start justify-center gap-5 flex-wrap">
+          <div className="flex items-start justify-center gap-[1.5vw] flex-wrap">
             {bottomRow.map((player, i) => renderSeat(player, midpoint + i))}
           </div>
 
@@ -186,7 +186,7 @@ const Room = () => {
         </div>
 
         {/* Right: Bulletin + Notes */}
-        <aside className="w-[360px] border-l border-border flex flex-col shrink-0 bg-card/50">
+        <aside className="w-[300px] border-l border-border flex flex-col shrink-0 bg-card/50">
           <GameBulletin logs={gameLogs} className="flex-[2] min-h-0" />
           <div className="flex-1 border-t border-border/40 flex flex-col bg-surface/30">
             <div className="px-4 py-2.5 flex items-center gap-2 border-b border-border/30">
@@ -285,7 +285,7 @@ const EmptySeat = ({ number, index }: { number: number; index: number }) => (
     animate={{ opacity: 0.35, scale: 1 }}
     transition={{ delay: index * 0.04 }}
   >
-    <div className="w-[130px] rounded-xl border-2 border-dashed border-border/30 bg-surface/20 overflow-hidden">
+    <div className="w-[clamp(100px,9vw,145px)] rounded-xl border-2 border-dashed border-border/30 bg-surface/20 overflow-hidden">
       <div className="pt-7 pb-2 flex flex-col items-center px-2">
         <div className="w-14 h-14 rounded-full border-2 border-dashed border-border/30 flex items-center justify-center">
           <span className="text-base text-muted-foreground/30 tabular-nums font-bold">{number}</span>
