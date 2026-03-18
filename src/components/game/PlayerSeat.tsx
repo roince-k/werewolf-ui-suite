@@ -123,7 +123,7 @@ const PlayerSeat = ({
 
           {/* Avatar area */}
           <div className="pt-10 pb-3 flex flex-col items-center px-3">
-            <div className={`relative w-16 h-16 rounded-full flex items-center justify-center border-2 transition-colors ${
+            <div className={`relative w-18 h-18 rounded-full flex items-center justify-center border-2 transition-colors ${
               isDead
                 ? 'border-destructive/40 bg-destructive/10'
                 : isSelected
