@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Send, UserPlus, BookOpen, MoreHorizontal,
   StickyNote, Clock, Shield, Skull, Swords, Moon, Sun
 } from 'lucide-react';
-import { useGameStore, type GamePhase, type GameLog } from '@/store/gameStore';
+import { useGameStore, type GamePhase, type GameLog, type Role } from '@/store/gameStore';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
 import NoteDrawer from '@/components/game/NoteDrawer';
 import PlayerSeat from '@/components/game/PlayerSeat';
 import GameBulletin from '@/components/game/GameBulletin';
+import PhaseBanner from '@/components/game/PhaseBanner';
 
 // Demo game logs
 const DEMO_LOGS: Omit<GameLog, 'id' | 'timestamp'>[] = [
@@ -40,14 +41,17 @@ const Room = () => {
   const [showRules, setShowRules] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
   const [inspectedPlayer, setInspectedPlayer] = useState<number | null>(null);
+  const [tempRoles, setTempRoles] = useState<Record<string, Role | null>>({});
 
   const players = currentRoom?.players || [];
   const totalSeats = currentRoom?.maxPlayers || 9;
 
-  // Fill empty seats for the circular layout
-  const allSeats = Array.from({ length: totalSeats }, (_, i) => {
-    return players[i] || null;
-  });
+  const allSeats = Array.from({ length: totalSeats }, (_, i) => players[i] || null);
+
+  // Split seats into two rows
+  const midpoint = Math.ceil(totalSeats / 2);
+  const topRow = allSeats.slice(0, midpoint);
+  const bottomRow = allSeats.slice(midpoint);
 
   const handleStartGame = () => {
     setGamePhase('night');
@@ -74,23 +78,27 @@ const Room = () => {
     castVote(targetNum);
   };
 
-  const getPhaseLabel = (phase: GamePhase) => {
-    switch (phase) {
-      case 'waiting': return '等待开始';
-      case 'night': return '夜晚';
-      case 'day': return '白天讨论';
-      case 'voting': return '投票阶段';
-      case 'ended': return '游戏结束';
-    }
+  const handleSetTempRole = (playerId: string, role: Role | null) => {
+    setTempRoles(prev => ({ ...prev, [playerId]: role }));
   };
 
-  const getPhaseIcon = (phase: GamePhase) => {
-    switch (phase) {
-      case 'night': return <Moon className="w-4 h-4 text-accent" />;
-      case 'day': return <Sun className="w-4 h-4 text-gold" />;
-      case 'voting': return <Swords className="w-4 h-4 text-primary" />;
-      default: return <Clock className="w-4 h-4 text-muted-foreground" />;
+  const renderSeat = (player: typeof allSeats[number], i: number) => {
+    if (player) {
+      return (
+        <PlayerSeat
+          key={player.id}
+          player={player}
+          index={i}
+          gamePhase={gamePhase}
+          isSelected={selectedTarget === player.number}
+          tempRole={tempRoles[player.id] || null}
+          onVote={() => handleVote(player.number)}
+          onInspect={() => setInspectedPlayer(player.number)}
+          onSetTempRole={(role) => handleSetTempRole(player.id, role)}
+        />
+      );
     }
+    return <EmptySeat key={`empty-${i}`} number={i + 1} index={i} />;
   };
 
   return (
@@ -104,21 +112,6 @@ const Room = () => {
         <div className="h-4 w-px bg-border" />
         <span className="text-sm font-medium text-foreground">{currentRoom?.name || '房间'}</span>
         <span className="text-xs text-muted-foreground">· {currentRoom?.mode || '9人标准局'}</span>
-
-        {/* Phase indicator in header */}
-        {gamePhase !== 'waiting' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-1.5 ml-3 px-3 py-1 rounded-full border border-border bg-surface text-xs"
-          >
-            {getPhaseIcon(gamePhase)}
-            <span className="text-foreground font-medium">{getPhaseLabel(gamePhase)}</span>
-            {gamePhase !== 'ended' && (
-              <span className="tabular-nums text-muted-foreground ml-1">02:30</span>
-            )}
-          </motion.div>
-        )}
 
         <div className="flex-1" />
         <button onClick={() => setShowNotes(!showNotes)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
@@ -135,98 +128,25 @@ const Room = () => {
         </button>
       </header>
 
-      {/* Main Content: Seats + Bulletin */}
+      {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: Circular Seat Arena */}
-        <div className="flex-1 flex flex-col items-center justify-center relative p-4">
-          {/* Seat circle container */}
-          <div className="relative w-full max-w-[560px] aspect-square">
-            {/* Ambient ring */}
-            <motion.div
-              className="absolute inset-[15%] rounded-full border border-border/30"
-              animate={gamePhase === 'night' ? {
-                borderColor: ['hsl(var(--accent) / 0.15)', 'hsl(var(--accent) / 0.35)', 'hsl(var(--accent) / 0.15)'],
-                boxShadow: ['0 0 20px hsl(var(--accent) / 0.05)', '0 0 40px hsl(var(--accent) / 0.12)', '0 0 20px hsl(var(--accent) / 0.05)']
-              } : gamePhase === 'voting' ? {
-                borderColor: ['hsl(var(--werewolf) / 0.15)', 'hsl(var(--werewolf) / 0.4)', 'hsl(var(--werewolf) / 0.15)'],
-                boxShadow: ['0 0 20px hsl(var(--werewolf) / 0.05)', '0 0 40px hsl(var(--werewolf) / 0.15)', '0 0 20px hsl(var(--werewolf) / 0.05)']
-              } : {}}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            />
-
-            {/* Center content */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              {gamePhase === 'waiting' ? (
-                <motion.div
-                  className="text-center"
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <span className="text-5xl block mb-3">🐺</span>
-                  <h2 className="display-title text-xl text-foreground mb-1">等待玩家</h2>
-                  <p className="text-xs text-muted-foreground">
-                    {players.length}/{totalSeats} 已就位
-                  </p>
-                </motion.div>
-              ) : gamePhase === 'night' ? (
-                <motion.div
-                  className="text-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <motion.span
-                    className="text-4xl block mb-2"
-                    animate={{ rotate: [0, -5, 5, 0] }}
-                    transition={{ duration: 4, repeat: Infinity }}
-                  >
-                    🌙
-                  </motion.span>
-                  <p className="display-title text-sm text-accent tracking-widest">夜幕降临</p>
-                </motion.div>
-              ) : gamePhase === 'voting' ? (
-                <motion.div
-                  className="text-center"
-                  initial={{ scale: 0.9 }}
-                  animate={{ scale: 1 }}
-                >
-                  <motion.span
-                    className="text-4xl block mb-2"
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    ⚔️
-                  </motion.span>
-                  <p className="display-title text-sm text-primary tracking-widest">公投审判</p>
-                </motion.div>
-              ) : gamePhase === 'day' ? (
-                <div className="text-center">
-                  <span className="text-4xl block mb-2">☀️</span>
-                  <p className="display-title text-sm text-gold tracking-widest">自由讨论</p>
-                </div>
-              ) : null}
-            </div>
-
-            {/* Player seats */}
-            {allSeats.map((player, i) =>
-              player ? (
-                <PlayerSeat
-                  key={player.id}
-                  player={player}
-                  index={i}
-                  total={totalSeats}
-                  gamePhase={gamePhase}
-                  isSelected={selectedTarget === player.number}
-                  onVote={() => handleVote(player.number)}
-                  onInspect={() => setInspectedPlayer(player.number)}
-                />
-              ) : (
-                <EmptySeat key={`empty-${i}`} index={i} total={totalSeats} number={i + 1} />
-              )
-            )}
+        {/* Left: Two-row seat layout */}
+        <div className="flex-1 flex flex-col items-center justify-center relative px-6 py-4">
+          {/* Top row */}
+          <div className="flex items-end justify-center gap-3 flex-wrap">
+            {topRow.map((player, i) => renderSeat(player, i))}
           </div>
 
-          {/* Action Bar at bottom */}
-          <div className="w-full max-w-[560px] mt-4">
+          {/* Phase banner in the middle */}
+          <PhaseBanner phase={gamePhase} playerCount={players.length} totalSeats={totalSeats} />
+
+          {/* Bottom row */}
+          <div className="flex items-start justify-center gap-3 flex-wrap">
+            {bottomRow.map((player, i) => renderSeat(player, midpoint + i))}
+          </div>
+
+          {/* Action Bar */}
+          <div className="w-full max-w-[640px] mt-6">
             {gamePhase === 'waiting' ? (
               <div className="flex gap-3">
                 <button
@@ -312,21 +232,9 @@ const Room = () => {
       {/* Rules Dropdown */}
       <AnimatePresence>
         {showRules && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40"
-            onClick={() => setShowRules(false)}
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-40" onClick={() => setShowRules(false)}>
             <div className="absolute inset-0 bg-void/50" />
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-12 right-20 glass-panel rounded-xl p-4 w-80 max-h-96 overflow-y-auto"
-              onClick={e => e.stopPropagation()}
-            >
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute top-12 right-20 glass-panel rounded-xl p-4 w-80 max-h-96 overflow-y-auto" onClick={e => e.stopPropagation()}>
               <h3 className="display-title text-lg text-foreground mb-3">游戏规则</h3>
               <div className="space-y-2 text-sm text-muted-foreground">
                 <p>• 4狼人 + 1预言家 + 1女巫 + 1猎人 + 5平民</p>
@@ -344,21 +252,9 @@ const Room = () => {
       {/* Invite Dropdown */}
       <AnimatePresence>
         {showInvite && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40"
-            onClick={() => setShowInvite(false)}
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-40" onClick={() => setShowInvite(false)}>
             <div className="absolute inset-0 bg-void/50" />
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-12 right-40 glass-panel rounded-xl p-4 w-72"
-              onClick={e => e.stopPropagation()}
-            >
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute top-12 right-40 glass-panel rounded-xl p-4 w-72" onClick={e => e.stopPropagation()}>
               <h3 className="display-title text-lg text-foreground mb-3">邀请玩家</h3>
               <button className="btn-ritual w-full text-sm mb-2">邀请AI玩家</button>
               <button className="btn-ghost-moon w-full text-sm">复制房间链接</button>
@@ -370,34 +266,26 @@ const Room = () => {
   );
 };
 
-// Empty seat placeholder matching card style
-const EmptySeat = ({ index, total, number }: { index: number; total: number; number: number }) => {
-  const angle = (index / total) * 2 * Math.PI - Math.PI / 2;
-  const x = 50 + 43 * Math.cos(angle);
-  const y = 50 + 40 * Math.sin(angle);
-
-  return (
-    <motion.div
-      className="absolute z-10"
-      style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
-      initial={{ opacity: 0, scale: 0 }}
-      animate={{ opacity: 0.3, scale: 1 }}
-      transition={{ delay: index * 0.06 }}
-    >
-      <div className="w-[72px] rounded-xl border-2 border-dashed border-border/30 bg-surface/30 overflow-hidden">
-        <div className="h-1 w-full bg-border/20" />
-        <div className="px-2 pt-3 pb-1 flex flex-col items-center">
-          <div className="w-11 h-11 rounded-full border-2 border-dashed border-border/30 flex items-center justify-center">
-            <span className="text-sm text-muted-foreground/30 tabular-nums font-bold">{number}</span>
-          </div>
-          <p className="text-[10px] text-muted-foreground/30 mt-1.5">空位</p>
+// Empty seat placeholder
+const EmptySeat = ({ number, index }: { number: number; index: number }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 0.35, scale: 1 }}
+    transition={{ delay: index * 0.04 }}
+  >
+    <div className="w-[100px] rounded-xl border-2 border-dashed border-border/30 bg-surface/20 overflow-hidden">
+      <div className="pt-7 pb-2 flex flex-col items-center px-2">
+        <div className="w-14 h-14 rounded-full border-2 border-dashed border-border/30 flex items-center justify-center">
+          <span className="text-base text-muted-foreground/30 tabular-nums font-bold">{number}</span>
         </div>
-        <div className="flex items-center justify-center px-2 py-1.5 border-t border-border/20">
-          <span className="text-[9px] text-muted-foreground/20">等待加入</span>
-        </div>
+        <p className="text-[11px] text-muted-foreground/30 mt-2 font-medium">空位</p>
+        <p className="text-[9px] text-muted-foreground/20 mt-0.5">等待加入</p>
       </div>
-    </motion.div>
-  );
-};
+      <div className="px-2 pb-2">
+        <div className="w-full h-6 rounded-md border border-dashed border-border/20" />
+      </div>
+    </div>
+  </motion.div>
+);
 
 export default Room;
