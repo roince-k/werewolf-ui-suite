@@ -158,7 +158,7 @@ const PlayerSeat = ({
           </div>
 
           {/* Temp role tag area */}
-          <div className="px-2 pb-2">
+          <div className="px-3 pb-3">
             {tempRole ? (
               <button
                 onClick={(e) => { e.stopPropagation(); onSetTempRole(null); }}
