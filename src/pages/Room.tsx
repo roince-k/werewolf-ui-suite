@@ -1,13 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Send, UserPlus, BookOpen, MoreHorizontal,
-  StickyNote, Clock, Shield, Skull, Eye as EyeIcon, Swords, Vote
+  StickyNote, Clock, Shield, Skull, Swords, Moon, Sun
 } from 'lucide-react';
-import { useGameStore, type GamePhase, type Player, type GameLog } from '@/store/gameStore';
+import { useGameStore, type GamePhase, type GameLog } from '@/store/gameStore';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
 import NoteDrawer from '@/components/game/NoteDrawer';
+import PlayerSeat from '@/components/game/PlayerSeat';
+import GameBulletin from '@/components/game/GameBulletin';
 
 // Demo game logs
 const DEMO_LOGS: Omit<GameLog, 'id' | 'timestamp'>[] = [
@@ -37,26 +39,22 @@ const Room = () => {
   const [showInvite, setShowInvite] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
-  const logRef = useRef<HTMLDivElement>(null);
+  const [inspectedPlayer, setInspectedPlayer] = useState<number | null>(null);
 
   const players = currentRoom?.players || [];
+  const totalSeats = currentRoom?.maxPlayers || 9;
 
-  useEffect(() => {
-    if (logRef.current) {
-      logRef.current.scrollTop = logRef.current.scrollHeight;
-    }
-  }, [gameLogs]);
+  // Fill empty seats for the circular layout
+  const allSeats = Array.from({ length: totalSeats }, (_, i) => {
+    return players[i] || null;
+  });
 
   const handleStartGame = () => {
     setGamePhase('night');
     setShowRoleReveal(true);
-
-    // Simulate game logs
     DEMO_LOGS.forEach((log, i) => {
       setTimeout(() => addGameLog(log), i * 800);
     });
-
-    // Simulate phase transitions
     setTimeout(() => setGamePhase('day'), 3000);
     setTimeout(() => setGamePhase('voting'), 8000);
     setTimeout(() => {
@@ -88,10 +86,10 @@ const Room = () => {
 
   const getPhaseIcon = (phase: GamePhase) => {
     switch (phase) {
-      case 'night': return '🌙';
-      case 'day': return '☀️';
-      case 'voting': return '🗳️';
-      default: return '⏳';
+      case 'night': return <Moon className="w-4 h-4 text-accent" />;
+      case 'day': return <Sun className="w-4 h-4 text-gold" />;
+      case 'voting': return <Swords className="w-4 h-4 text-primary" />;
+      default: return <Clock className="w-4 h-4 text-muted-foreground" />;
     }
   };
 
@@ -106,7 +104,26 @@ const Room = () => {
         <div className="h-4 w-px bg-border" />
         <span className="text-sm font-medium text-foreground">{currentRoom?.name || '房间'}</span>
         <span className="text-xs text-muted-foreground">· {currentRoom?.mode || '9人标准局'}</span>
+
+        {/* Phase indicator in header */}
+        {gamePhase !== 'waiting' && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center gap-1.5 ml-3 px-3 py-1 rounded-full border border-border bg-surface text-xs"
+          >
+            {getPhaseIcon(gamePhase)}
+            <span className="text-foreground font-medium">{getPhaseLabel(gamePhase)}</span>
+            {gamePhase !== 'ended' && (
+              <span className="tabular-nums text-muted-foreground ml-1">02:30</span>
+            )}
+          </motion.div>
+        )}
+
         <div className="flex-1" />
+        <button onClick={() => setShowNotes(!showNotes)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
+          <StickyNote className="w-3.5 h-3.5" /> 笔记
+        </button>
         <button onClick={() => setShowInvite(!showInvite)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
           <UserPlus className="w-3.5 h-3.5" /> 邀请
         </button>
@@ -118,85 +135,98 @@ const Room = () => {
         </button>
       </header>
 
-      {/* Main Content */}
+      {/* Main Content: Seats + Bulletin */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: Player List */}
-        <aside className="w-60 border-r border-border flex flex-col shrink-0">
-          <div className="p-3 border-b border-border">
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              玩家席位 ({players.length}/{currentRoom?.maxPlayers || 9})
-            </h3>
-          </div>
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
-            {players.map((p, i) => (
-              <PlayerListCard
-                key={p.id}
-                player={p}
-                index={i}
-                isGamePhase={gamePhase !== 'waiting'}
-                isVoting={gamePhase === 'voting'}
-                isSelected={selectedTarget === p.number}
-                onVote={() => handleVote(p.number)}
-              />
-            ))}
-            {/* Empty seats */}
-            {Array.from({ length: (currentRoom?.maxPlayers || 9) - players.length }).map((_, i) => (
-              <div key={`empty-${i}`} className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-border/50 text-muted-foreground">
-                <span className="text-xs tabular-nums w-5">{players.length + i + 1}</span>
-                <span className="text-sm">空位</span>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={() => setShowNotes(!showNotes)}
-            className="m-2 flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-all border border-border"
-          >
-            <StickyNote className="w-4 h-4" /> 笔记
-          </button>
-        </aside>
-
-        {/* Center: Game Area */}
-        <main className="flex-1 flex flex-col overflow-hidden">
-          {/* Phase Banner */}
-          {gamePhase !== 'waiting' && (
+        {/* Left: Circular Seat Arena */}
+        <div className="flex-1 flex flex-col items-center justify-center relative p-4">
+          {/* Seat circle container */}
+          <div className="relative w-full max-w-[560px] aspect-square">
+            {/* Ambient ring */}
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="phase-banner flex items-center justify-center gap-3"
-            >
-              <span>{getPhaseIcon(gamePhase)}</span>
-              <span className="text-sm">{getPhaseLabel(gamePhase)}</span>
-              {gamePhase !== 'ended' && (
-                <span className="text-sm tabular-nums flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> 02:30
-                </span>
-              )}
-            </motion.div>
-          )}
+              className="absolute inset-[15%] rounded-full border border-border/30"
+              animate={gamePhase === 'night' ? {
+                borderColor: ['hsl(var(--accent) / 0.15)', 'hsl(var(--accent) / 0.35)', 'hsl(var(--accent) / 0.15)'],
+                boxShadow: ['0 0 20px hsl(var(--accent) / 0.05)', '0 0 40px hsl(var(--accent) / 0.12)', '0 0 20px hsl(var(--accent) / 0.05)']
+              } : gamePhase === 'voting' ? {
+                borderColor: ['hsl(var(--werewolf) / 0.15)', 'hsl(var(--werewolf) / 0.4)', 'hsl(var(--werewolf) / 0.15)'],
+                boxShadow: ['0 0 20px hsl(var(--werewolf) / 0.05)', '0 0 40px hsl(var(--werewolf) / 0.15)', '0 0 20px hsl(var(--werewolf) / 0.05)']
+              } : {}}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            />
 
-          {/* Game Log / Waiting Screen */}
-          <div ref={logRef} className="flex-1 overflow-y-auto p-4 space-y-2">
-            {gamePhase === 'waiting' ? (
-              <div className="flex flex-col items-center justify-center h-full text-center">
+            {/* Center content */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              {gamePhase === 'waiting' ? (
                 <motion.div
-                  animate={{ y: [0, -8, 0] }}
+                  className="text-center"
+                  animate={{ y: [0, -6, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                  className="text-6xl mb-6"
                 >
-                  🐺
+                  <span className="text-5xl block mb-3">🐺</span>
+                  <h2 className="display-title text-xl text-foreground mb-1">等待玩家</h2>
+                  <p className="text-xs text-muted-foreground">
+                    {players.length}/{totalSeats} 已就位
+                  </p>
                 </motion.div>
-                <h2 className="display-title text-2xl text-foreground mb-2">等待玩家加入</h2>
-                <p className="text-muted-foreground text-sm">
-                  {players.length}/{currentRoom?.maxPlayers || 9} 名玩家已就位
-                </p>
-              </div>
-            ) : (
-              gameLogs.map(log => <GameLogEntry key={log.id} log={log} />)
+              ) : gamePhase === 'night' ? (
+                <motion.div
+                  className="text-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <motion.span
+                    className="text-4xl block mb-2"
+                    animate={{ rotate: [0, -5, 5, 0] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                  >
+                    🌙
+                  </motion.span>
+                  <p className="display-title text-sm text-accent tracking-widest">夜幕降临</p>
+                </motion.div>
+              ) : gamePhase === 'voting' ? (
+                <motion.div
+                  className="text-center"
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                >
+                  <motion.span
+                    className="text-4xl block mb-2"
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    ⚔️
+                  </motion.span>
+                  <p className="display-title text-sm text-primary tracking-widest">公投审判</p>
+                </motion.div>
+              ) : gamePhase === 'day' ? (
+                <div className="text-center">
+                  <span className="text-4xl block mb-2">☀️</span>
+                  <p className="display-title text-sm text-gold tracking-widest">自由讨论</p>
+                </div>
+              ) : null}
+            </div>
+
+            {/* Player seats */}
+            {allSeats.map((player, i) =>
+              player ? (
+                <PlayerSeat
+                  key={player.id}
+                  player={player}
+                  index={i}
+                  total={totalSeats}
+                  gamePhase={gamePhase}
+                  isSelected={selectedTarget === player.number}
+                  onVote={() => handleVote(player.number)}
+                  onInspect={() => setInspectedPlayer(player.number)}
+                />
+              ) : (
+                <EmptySeat key={`empty-${i}`} index={i} total={totalSeats} number={i + 1} />
+              )
             )}
           </div>
 
-          {/* Action Bar */}
-          <div className="border-t border-border p-3">
+          {/* Action Bar at bottom */}
+          <div className="w-full max-w-[560px] mt-4">
             {gamePhase === 'waiting' ? (
               <div className="flex gap-3">
                 <button
@@ -233,7 +263,12 @@ const Room = () => {
               </div>
             ) : null}
           </div>
-        </main>
+        </div>
+
+        {/* Right: Game Bulletin */}
+        <aside className="w-80 border-l border-border flex flex-col shrink-0 bg-card/50">
+          <GameBulletin logs={gameLogs} className="flex-1" />
+        </aside>
       </div>
 
       {/* Role Reveal */}
@@ -335,100 +370,24 @@ const Room = () => {
   );
 };
 
-// Player List Card
-const PlayerListCard = ({
-  player, index, isGamePhase, isVoting, isSelected, onVote
-}: {
-  player: Player; index: number; isGamePhase: boolean;
-  isVoting: boolean; isSelected: boolean; onVote: () => void;
-}) => {
-  const isDead = player.status === 'dead';
+// Empty seat placeholder in circular layout
+const EmptySeat = ({ index, total, number }: { index: number; total: number; number: number }) => {
+  const angle = (index / total) * 2 * Math.PI - Math.PI / 2;
+  const x = 50 + 42 * Math.cos(angle);
+  const y = 50 + 38 * Math.sin(angle);
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-all duration-200 ${
-        isDead
-          ? 'player-dead'
-          : isSelected
-          ? 'border-primary bg-primary/10'
-          : 'border-border hover:border-accent/30 hover:bg-secondary/50'
-      }`}
+      className="absolute"
+      style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 0.4, scale: 1 }}
+      transition={{ delay: index * 0.08 }}
     >
-      <span className="text-xs tabular-nums text-muted-foreground w-5">{player.number}</span>
-      <span className="text-lg">{player.emoji}</span>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-foreground truncate">{player.name}</p>
-        <p className="text-xs text-muted-foreground">
-          {isDead ? '已死亡' : player.isAI ? (player.personality || 'AI') : player.isReady ? '已准备' : '未准备'}
-        </p>
+      <div className="w-16 h-16 rounded-full border-2 border-dashed border-border/40 flex items-center justify-center">
+        <span className="text-xs text-muted-foreground/50 tabular-nums">{number}</span>
       </div>
-      {isVoting && !isDead && (
-        <button
-          onClick={onVote}
-          className={`p-1 rounded transition-colors ${
-            isSelected ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Vote className="w-4 h-4" />
-        </button>
-      )}
-      {isDead && (
-        <span className="text-destructive text-sm font-bold">✕</span>
-      )}
-    </motion.div>
-  );
-};
-
-// Game Log Entry
-const GameLogEntry = ({ log }: { log: GameLog }) => {
-  if (log.type === 'phase') {
-    return (
-      <div className="phase-banner text-xs my-3 rounded-md">
-        {log.content}
-      </div>
-    );
-  }
-
-  if (log.type === 'speech') {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex gap-3"
-      >
-        <div className="w-7 h-7 rounded-full bg-surface-elevated border border-border flex items-center justify-center text-xs shrink-0 mt-0.5">
-          {log.playerNumber}
-        </div>
-        <div>
-          <span className="text-xs text-accent">{log.playerName}</span>
-          <div className="surface-elevated rounded-lg px-3 py-2 mt-1 text-sm text-secondary-foreground max-w-md">
-            {log.content}
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
-
-  const icon = log.type === 'death' || log.type === 'execution' ? '†'
-    : log.type === 'vote_result' ? '✗'
-    : log.type === 'game_end' ? '◉' : '系统';
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className={`text-sm px-3 py-2 rounded-md ${
-        log.type === 'death' || log.type === 'execution'
-          ? 'bg-destructive/5 text-destructive border border-destructive/20'
-          : log.type === 'game_end'
-          ? 'bg-gold/5 text-gold border border-gold/20 text-center display-title text-base'
-          : 'text-muted-foreground'
-      }`}
-    >
-      {icon} {log.content}
+      <p className="text-[10px] text-center mt-1.5 text-muted-foreground/30">空位</p>
     </motion.div>
   );
 };
