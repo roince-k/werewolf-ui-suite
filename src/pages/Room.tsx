@@ -133,7 +133,7 @@ const Room = () => {
         {/* Left: Two-row seat layout */}
         <div className="flex-1 flex flex-col items-center justify-center relative px-6 py-4">
           {/* Top row */}
-          <div className="flex items-end justify-center gap-3 flex-wrap">
+          <div className="flex items-end justify-center gap-5 flex-wrap">
             {topRow.map((player, i) => renderSeat(player, i))}
           </div>
 
@@ -141,7 +141,7 @@ const Room = () => {
           <PhaseBanner phase={gamePhase} playerCount={players.length} totalSeats={totalSeats} />
 
           {/* Bottom row */}
-          <div className="flex items-start justify-center gap-3 flex-wrap">
+          <div className="flex items-start justify-center gap-5 flex-wrap">
             {bottomRow.map((player, i) => renderSeat(player, midpoint + i))}
           </div>
 
