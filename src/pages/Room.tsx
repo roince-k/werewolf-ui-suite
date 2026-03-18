@@ -370,24 +370,32 @@ const Room = () => {
   );
 };
 
-// Empty seat placeholder in circular layout
+// Empty seat placeholder matching card style
 const EmptySeat = ({ index, total, number }: { index: number; total: number; number: number }) => {
   const angle = (index / total) * 2 * Math.PI - Math.PI / 2;
-  const x = 50 + 42 * Math.cos(angle);
-  const y = 50 + 38 * Math.sin(angle);
+  const x = 50 + 43 * Math.cos(angle);
+  const y = 50 + 40 * Math.sin(angle);
 
   return (
     <motion.div
-      className="absolute"
+      className="absolute z-10"
       style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
       initial={{ opacity: 0, scale: 0 }}
-      animate={{ opacity: 0.4, scale: 1 }}
-      transition={{ delay: index * 0.08 }}
+      animate={{ opacity: 0.3, scale: 1 }}
+      transition={{ delay: index * 0.06 }}
     >
-      <div className="w-16 h-16 rounded-full border-2 border-dashed border-border/40 flex items-center justify-center">
-        <span className="text-xs text-muted-foreground/50 tabular-nums">{number}</span>
+      <div className="w-[72px] rounded-xl border-2 border-dashed border-border/30 bg-surface/30 overflow-hidden">
+        <div className="h-1 w-full bg-border/20" />
+        <div className="px-2 pt-3 pb-1 flex flex-col items-center">
+          <div className="w-11 h-11 rounded-full border-2 border-dashed border-border/30 flex items-center justify-center">
+            <span className="text-sm text-muted-foreground/30 tabular-nums font-bold">{number}</span>
+          </div>
+          <p className="text-[10px] text-muted-foreground/30 mt-1.5">空位</p>
+        </div>
+        <div className="flex items-center justify-center px-2 py-1.5 border-t border-border/20">
+          <span className="text-[9px] text-muted-foreground/20">等待加入</span>
+        </div>
       </div>
-      <p className="text-[10px] text-center mt-1.5 text-muted-foreground/30">空位</p>
     </motion.div>
   );
 };
