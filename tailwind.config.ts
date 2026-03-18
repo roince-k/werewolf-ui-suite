@@ -13,6 +13,11 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        display: ['"Cormorant Garamond"', 'serif'],
+        body: ['Inter', '"Geist Sans"', 'system-ui', 'sans-serif'],
+        mono: ['"Fira Code"', '"Roboto Mono"', 'monospace'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -47,6 +52,25 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          elevated: "hsl(var(--surface-elevated))",
+        },
+        werewolf: {
+          DEFAULT: "hsl(var(--werewolf))",
+          glow: "hsl(var(--werewolf-glow))",
+        },
+        moonlight: {
+          DEFAULT: "hsl(var(--moonlight))",
+          dim: "hsl(var(--moonlight-dim))",
+        },
+        void: "hsl(var(--void))",
+        blood: {
+          DEFAULT: "hsl(var(--blood))",
+          dim: "hsl(var(--blood-dim))",
+        },
+        alive: "hsl(var(--alive))",
+        gold: "hsl(var(--gold))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -65,25 +89,22 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(153, 50, 30, 0.4)" },
+          "50%": { boxShadow: "0 0 0 12px rgba(153, 50, 30, 0)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },
