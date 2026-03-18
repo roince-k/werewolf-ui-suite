@@ -33,7 +33,7 @@ const Room = () => {
   const {
     currentRoom, isReady, setReady, gamePhase, setGamePhase,
     gameLogs, addGameLog, myRole, showRoleReveal, setShowRoleReveal,
-    gameResult, setGameResult, castVote
+    gameResult, setGameResult, castVote, notes, setNotes
   } = useGameStore();
   const [message, setMessage] = useState('');
   const [showNotes, setShowNotes] = useState(false);
