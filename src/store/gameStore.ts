@@ -155,6 +155,9 @@ export interface GameState {
   agentTemplates: AgentTemplate[];
   selectedAgentId: string | null;
 
+  // Solo mode
+  isSoloMode: boolean;
+
   // Actions
   login: (username: string) => void;
   logout: () => void;
