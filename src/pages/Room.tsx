@@ -83,6 +83,29 @@ const Room = () => {
     setTempRoles(prev => ({ ...prev, [playerId]: role }));
   };
 
+  const handleNightAction = (action: NightAction) => {
+    const target = players.find(p => p.id === action.targetId);
+    const targetLabel = target ? `${target.number}号 ${target.name}` : '';
+    switch (action.type) {
+      case 'werewolf_kill':
+        addGameLog({ type: 'system', content: `🐺 你选择了袭击 ${targetLabel}` });
+        break;
+      case 'seer_check':
+        addGameLog({ type: 'system', content: `🔮 你查验了 ${targetLabel} 的身份` });
+        break;
+      case 'witch_save':
+        addGameLog({ type: 'system', content: '💊 你使用了解药' });
+        break;
+      case 'witch_poison':
+        addGameLog({ type: 'system', content: `☠️ 你对 ${targetLabel} 使用了毒药` });
+        break;
+    }
+  };
+
+  const handleSkipNight = () => {
+    addGameLog({ type: 'system', content: '你选择了跳过本轮行动' });
+  };
+
   const renderSeat = (player: typeof allSeats[number], i: number) => {
     if (player) {
       return (
