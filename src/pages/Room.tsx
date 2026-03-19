@@ -11,6 +11,7 @@ import NoteDrawer from '@/components/game/NoteDrawer';
 import PlayerSeat from '@/components/game/PlayerSeat';
 import GameBulletin from '@/components/game/GameBulletin';
 import PhaseBanner from '@/components/game/PhaseBanner';
+import NightActionPanel, { type NightAction } from '@/components/game/NightActionPanel';
 
 // Demo game logs
 const DEMO_LOGS: Omit<GameLog, 'id' | 'timestamp'>[] = [
