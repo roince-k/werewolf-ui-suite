@@ -138,7 +138,7 @@ const Room = () => {
     toast.success(`已邀请 ${username}`);
   };
 
-  const renderSeat = (player: typeof allSeats[number], i: number) => {
+  const renderSeat = (player: typeof allSeats[number], i: number, isTopRow: boolean) => {
     if (player) {
       return (
         <PlayerSeat
@@ -148,6 +148,7 @@ const Room = () => {
           gamePhase={gamePhase}
           isSelected={selectedTarget === player.number}
           tempRole={tempRoles[player.id] || null}
+          pickerDirection={isTopRow ? 'down' : 'up'}
           onVote={() => handleVote(player.number)}
           onInspect={() => setInspectedPlayer(player.number)}
           onSetTempRole={(role) => handleSetTempRole(player.id, role)}
