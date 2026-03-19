@@ -172,6 +172,7 @@ export interface GameState {
   setShowRoleReveal: (show: boolean) => void;
   setGameResult: (result: GameState['gameResult']) => void;
   castVote: (targetNumber: number) => void;
+  addPlayerToRoom: (player: Player) => void;
   addAgentTemplate: (agent: Omit<AgentTemplate, 'id'>) => void;
   removeAgentTemplate: (id: string) => void;
   selectAgent: (id: string) => void;
