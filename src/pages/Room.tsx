@@ -338,17 +338,15 @@ const Room = () => {
         )}
       </AnimatePresence>
 
-      {/* Invite Dropdown */}
+      {/* Invite Modal */}
       <AnimatePresence>
-        {showInvite && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-40" onClick={() => setShowInvite(false)}>
-            <div className="absolute inset-0 bg-void/50" />
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute top-12 right-40 glass-panel rounded-xl p-4 w-72" onClick={e => e.stopPropagation()}>
-              <h3 className="display-title text-lg text-foreground mb-3">邀请玩家</h3>
-              <button className="btn-ritual w-full text-sm mb-2">邀请AI玩家</button>
-              <button className="btn-ghost-moon w-full text-sm">复制房间链接</button>
-            </motion.div>
-          </motion.div>
+        {inviteSeatNumber !== null && (
+          <InviteModal
+            seatNumber={inviteSeatNumber === -1 ? (allSeats.findIndex(s => !s) + 1 || 1) : inviteSeatNumber}
+            onClose={() => setInviteSeatNumber(null)}
+            onInviteAgent={handleInviteAgent}
+            onInviteLobbyUser={handleInviteLobbyUser}
+          />
         )}
       </AnimatePresence>
     </div>
