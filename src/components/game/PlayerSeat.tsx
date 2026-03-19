@@ -10,6 +10,7 @@ interface PlayerSeatProps {
   isSelected: boolean;
   isSpeaking?: boolean;
   tempRole?: Role | null;
+  pickerDirection?: 'up' | 'down';
   onVote: () => void;
   onInspect: () => void;
   onSetTempRole: (role: Role | null) => void;
