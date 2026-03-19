@@ -175,6 +175,7 @@ export interface GameState {
   addAgentTemplate: (agent: Omit<AgentTemplate, 'id'>) => void;
   removeAgentTemplate: (id: string) => void;
   selectAgent: (id: string) => void;
+  setSoloMode: (solo: boolean) => void;
 }
 
 const MOCK_ROOMS: Room[] = [
