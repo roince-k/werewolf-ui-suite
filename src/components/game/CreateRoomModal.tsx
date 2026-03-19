@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, User, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '@/store/gameStore';
 
 const CreateRoomModal = ({ onClose }: { onClose: () => void }) => {
   const navigate = useNavigate();
-  const { joinRoom } = useGameStore();
+  const { joinRoom, setSoloMode } = useGameStore();
   const [name, setName] = useState('');
   const [mode, setMode] = useState('9');
+  const [isSolo, setIsSolo] = useState(false);
 
   const handleCreate = () => {
     if (!name.trim()) return;
-    // Mock: just join the first room
+    setSoloMode(isSolo);
     joinRoom('1');
     onClose();
     navigate('/room');
@@ -37,6 +38,37 @@ const CreateRoomModal = ({ onClose }: { onClose: () => void }) => {
             <label className="block text-sm text-muted-foreground mb-1.5">房间名称</label>
             <input value={name} onChange={e => setName(e.target.value)} placeholder="输入房间名称" className="input-ritual text-sm" />
           </div>
+
+          {/* Game mode: Solo vs Multiplayer */}
+          <div>
+            <label className="block text-sm text-muted-foreground mb-1.5">游戏模式</label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsSolo(false)}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm transition-all border ${
+                  !isSolo ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary text-muted-foreground border-border hover:text-foreground'
+                }`}
+              >
+                <Users className="w-4 h-4" />
+                多人模式
+              </button>
+              <button
+                onClick={() => setIsSolo(true)}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm transition-all border ${
+                  isSolo ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary text-muted-foreground border-border hover:text-foreground'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                单人模式
+              </button>
+            </div>
+            {isSolo && (
+              <p className="text-[11px] text-accent/70 mt-1.5">
+                🎮 单人模式：无时间限制，可自由思考推理
+              </p>
+            )}
+          </div>
+
           <div>
             <label className="block text-sm text-muted-foreground mb-1.5">板子类型</label>
             <div className="flex gap-2">

@@ -273,4 +273,5 @@ export const useGameStore = create<GameState>((set) => ({
     agentTemplates: state.agentTemplates.filter(a => a.id !== id),
   })),
   selectAgent: (id) => set({ selectedAgentId: id }),
+  setSoloMode: (solo) => set({ isSoloMode: solo }),
 }));
