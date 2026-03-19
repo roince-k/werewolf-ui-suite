@@ -113,21 +113,22 @@ const Room = () => {
 
   const handleInviteAgent = (agent: AgentTemplate) => {
     if (inviteSeatNumber === null) return;
-    const newPlayer = {
+    const seatNum = inviteSeatNumber === -1 ? (allSeats.findIndex(s => !s) + 1 || 1) : inviteSeatNumber;
+    const newPlayer: import('@/store/gameStore').Player = {
       id: crypto.randomUUID(),
-      number: inviteSeatNumber,
+      number: seatNum,
       name: agent.name,
       isAI: true,
-      status: 'alive' as const,
+      status: 'alive',
       isReady: true,
       isOwner: false,
       emoji: agent.emoji,
       personality: agent.personality,
     };
-    // In a real app this would update the room via backend
-    addGameLog({ type: 'system', content: `🤖 ${agent.name} 加入了 ${inviteSeatNumber}号位` });
+    addPlayerToRoom(newPlayer);
+    addGameLog({ type: 'system', content: `🤖 ${agent.name} 加入了 ${seatNum}号位` });
     setInviteSeatNumber(null);
-    toast.success(`${agent.name} 已加入 ${inviteSeatNumber}号位`);
+    toast.success(`${agent.name} 已加入 ${seatNum}号位`);
   };
 
   const handleInviteLobbyUser = (username: string) => {

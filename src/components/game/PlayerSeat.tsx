@@ -104,7 +104,7 @@ const PlayerSeat = ({
         }`}
       >
         <div
-          className={`relative rounded-2xl overflow-hidden transition-all duration-300 ${
+          className={`relative rounded-2xl transition-all duration-300 ${
             isDead
               ? 'border border-destructive/20 bg-destructive/5 grayscale'
               : isSelected

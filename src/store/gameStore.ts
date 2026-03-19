@@ -267,6 +267,17 @@ export const useGameStore = create<GameState>((set) => ({
   castVote: (targetNumber) => set((state) => ({
     votes: { ...state.votes, [state.currentUser?.id || 'me']: targetNumber },
   })),
+  addPlayerToRoom: (player) => set((state) => {
+    if (!state.currentRoom) return {};
+    const exists = state.currentRoom.players.some(p => p.number === player.number);
+    if (exists) return {};
+    return {
+      currentRoom: {
+        ...state.currentRoom,
+        players: [...state.currentRoom.players, player].sort((a, b) => a.number - b.number),
+      },
+    };
+  }),
   addAgentTemplate: (agent) => set((state) => ({
     agentTemplates: [...state.agentTemplates, { ...agent, id: crypto.randomUUID() }],
   })),
