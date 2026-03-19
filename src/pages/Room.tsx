@@ -5,7 +5,7 @@ import {
   ArrowLeft, Send, UserPlus, BookOpen, MoreHorizontal,
   StickyNote, Clock, Shield, Skull, Swords, Moon, Sun
 } from 'lucide-react';
-import { useGameStore, type GamePhase, type GameLog, type Role } from '@/store/gameStore';
+// store import moved below
 import { useGameStore, type GamePhase, type GameLog, type Role, type AgentTemplate } from '@/store/gameStore';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
 import NoteDrawer from '@/components/game/NoteDrawer';
