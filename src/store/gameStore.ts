@@ -151,6 +151,10 @@ export interface GameState {
   // Notes
   notes: string;
 
+  // Agent templates
+  agentTemplates: AgentTemplate[];
+  selectedAgentId: string | null;
+
   // Actions
   login: (username: string) => void;
   logout: () => void;
@@ -165,6 +169,9 @@ export interface GameState {
   setShowRoleReveal: (show: boolean) => void;
   setGameResult: (result: GameState['gameResult']) => void;
   castVote: (targetNumber: number) => void;
+  addAgentTemplate: (agent: Omit<AgentTemplate, 'id'>) => void;
+  removeAgentTemplate: (id: string) => void;
+  selectAgent: (id: string) => void;
 }
 
 const MOCK_ROOMS: Room[] = [
