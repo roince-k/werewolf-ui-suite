@@ -28,7 +28,7 @@ const ROLE_CONFIG: Record<Role, { label: string; icon: React.ReactNode; color: s
 const PLAYER_AVATARS = ['🐺', '🦊', '🦉', '🐍', '🦇', '🐻', '🦅', '🐱', '🐰', '🦌', '🐸', '🦁'];
 
 const PlayerSeat = ({
-  player, index, gamePhase, isSelected, isSpeaking, tempRole, onVote, onInspect, onSetTempRole,
+  player, index, gamePhase, isSelected, isSpeaking, tempRole, pickerDirection = 'up', onVote, onInspect, onSetTempRole,
 }: PlayerSeatProps) => {
   const [showRolePicker, setShowRolePicker] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
