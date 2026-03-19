@@ -203,7 +203,7 @@ const Room = () => {
         <div className="flex-1 flex flex-col items-center justify-between relative px-4 py-3">
           {/* Top row */}
           <div className="flex items-end justify-center gap-[1.5vw] flex-wrap">
-            {topRow.map((player, i) => renderSeat(player, i))}
+            {topRow.map((player, i) => renderSeat(player, i, true))}
           </div>
 
           {/* Phase banner in the middle */}
@@ -211,7 +211,7 @@ const Room = () => {
 
           {/* Bottom row */}
           <div className="flex items-start justify-center gap-[1.5vw] flex-wrap">
-            {bottomRow.map((player, i) => renderSeat(player, midpoint + i))}
+            {bottomRow.map((player, i) => renderSeat(player, midpoint + i, false))}
           </div>
 
           {/* Action Bar */}
