@@ -41,6 +41,7 @@ const Room = () => {
   const [message, setMessage] = useState('');
   const [showNotes, setShowNotes] = useState(false); // keep for header toggle if needed
   const [showInvite, setShowInvite] = useState(false);
+  const [inviteSeatNumber, setInviteSeatNumber] = useState<number | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
   const [inspectedPlayer, setInspectedPlayer] = useState<number | null>(null);
