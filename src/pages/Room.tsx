@@ -1,17 +1,20 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Send, UserPlus, BookOpen, MoreHorizontal,
   StickyNote, Clock, Shield, Skull, Swords, Moon, Sun
 } from 'lucide-react';
-import { useGameStore, type GamePhase, type GameLog, type Role } from '@/store/gameStore';
+
+import { useGameStore, type GamePhase, type GameLog, type Role, type AgentTemplate } from '@/store/gameStore';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
 import NoteDrawer from '@/components/game/NoteDrawer';
 import PlayerSeat from '@/components/game/PlayerSeat';
 import GameBulletin from '@/components/game/GameBulletin';
 import PhaseBanner from '@/components/game/PhaseBanner';
 import NightActionPanel, { type NightAction } from '@/components/game/NightActionPanel';
+import InviteModal from '@/components/game/InviteModal';
 
 // Demo game logs
 const DEMO_LOGS: Omit<GameLog, 'id' | 'timestamp'>[] = [
@@ -39,6 +42,7 @@ const Room = () => {
   const [message, setMessage] = useState('');
   const [showNotes, setShowNotes] = useState(false); // keep for header toggle if needed
   const [showInvite, setShowInvite] = useState(false);
+  const [inviteSeatNumber, setInviteSeatNumber] = useState<number | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
   const [inspectedPlayer, setInspectedPlayer] = useState<number | null>(null);
@@ -106,6 +110,32 @@ const Room = () => {
     addGameLog({ type: 'system', content: '你选择了跳过本轮行动' });
   };
 
+  const handleInviteAgent = (agent: AgentTemplate) => {
+    if (inviteSeatNumber === null) return;
+    const newPlayer = {
+      id: crypto.randomUUID(),
+      number: inviteSeatNumber,
+      name: agent.name,
+      isAI: true,
+      status: 'alive' as const,
+      isReady: true,
+      isOwner: false,
+      emoji: agent.emoji,
+      personality: agent.personality,
+    };
+    // In a real app this would update the room via backend
+    addGameLog({ type: 'system', content: `🤖 ${agent.name} 加入了 ${inviteSeatNumber}号位` });
+    setInviteSeatNumber(null);
+    toast.success(`${agent.name} 已加入 ${inviteSeatNumber}号位`);
+  };
+
+  const handleInviteLobbyUser = (username: string) => {
+    if (inviteSeatNumber === null) return;
+    addGameLog({ type: 'system', content: `📨 已向 ${username} 发送邀请` });
+    setInviteSeatNumber(null);
+    toast.success(`已邀请 ${username}`);
+  };
+
   const renderSeat = (player: typeof allSeats[number], i: number) => {
     if (player) {
       return (
@@ -122,7 +152,14 @@ const Room = () => {
         />
       );
     }
-    return <EmptySeat key={`empty-${i}`} number={i + 1} index={i} />;
+    return (
+      <EmptySeat
+        key={`empty-${i}`}
+        number={i + 1}
+        index={i}
+        onClick={() => setInviteSeatNumber(i + 1)}
+      />
+    );
   };
 
   return (
@@ -146,7 +183,7 @@ const Room = () => {
         <button onClick={() => setShowNotes(!showNotes)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
           <StickyNote className="w-3.5 h-3.5" /> 笔记
         </button>
-        <button onClick={() => setShowInvite(!showInvite)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
+        <button onClick={() => setInviteSeatNumber(-1)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
           <UserPlus className="w-3.5 h-3.5" /> 邀请
         </button>
         <button onClick={() => setShowRules(!showRules)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
@@ -302,40 +339,47 @@ const Room = () => {
         )}
       </AnimatePresence>
 
-      {/* Invite Dropdown */}
+      {/* Invite Modal */}
       <AnimatePresence>
-        {showInvite && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-40" onClick={() => setShowInvite(false)}>
-            <div className="absolute inset-0 bg-void/50" />
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute top-12 right-40 glass-panel rounded-xl p-4 w-72" onClick={e => e.stopPropagation()}>
-              <h3 className="display-title text-lg text-foreground mb-3">邀请玩家</h3>
-              <button className="btn-ritual w-full text-sm mb-2">邀请AI玩家</button>
-              <button className="btn-ghost-moon w-full text-sm">复制房间链接</button>
-            </motion.div>
-          </motion.div>
+        {inviteSeatNumber !== null && (
+          <InviteModal
+            seatNumber={inviteSeatNumber === -1 ? (allSeats.findIndex(s => !s) + 1 || 1) : inviteSeatNumber}
+            onClose={() => setInviteSeatNumber(null)}
+            onInviteAgent={handleInviteAgent}
+            onInviteLobbyUser={handleInviteLobbyUser}
+          />
         )}
       </AnimatePresence>
     </div>
   );
 };
 
-// Empty seat placeholder
-const EmptySeat = ({ number, index }: { number: number; index: number }) => (
+// Empty seat placeholder - clickable
+const EmptySeat = ({ number, index, onClick }: { number: number; index: number; onClick: () => void }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.9 }}
-    animate={{ opacity: 0.35, scale: 1 }}
+    animate={{ opacity: 0.6, scale: 1 }}
     transition={{ delay: index * 0.04 }}
+    whileHover={{ opacity: 1, scale: 1.03 }}
+    whileTap={{ scale: 0.97 }}
+    onClick={onClick}
+    className="cursor-pointer"
   >
-    <div className="w-[clamp(100px,9vw,145px)] rounded-xl border-2 border-dashed border-border/30 bg-surface/20 overflow-hidden">
-      <div className="pt-7 pb-2 flex flex-col items-center px-2">
-        <div className="w-14 h-14 rounded-full border-2 border-dashed border-border/30 flex items-center justify-center">
-          <span className="text-base text-muted-foreground/30 tabular-nums font-bold">{number}</span>
+    <div className="w-[clamp(108px,10vw,150px)] rounded-2xl border-2 border-dashed border-primary/20 bg-primary/[0.03] overflow-hidden hover:border-primary/40 hover:bg-primary/[0.06] transition-all">
+      <div className="pt-6 pb-2 flex flex-col items-center px-2">
+        <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-primary/20 flex items-center justify-center bg-primary/5">
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-lg text-primary/40 tabular-nums font-black">{number}</span>
+            <UserPlus className="w-3.5 h-3.5 text-primary/30" />
+          </div>
         </div>
-        <p className="text-[11px] text-muted-foreground/30 mt-2 font-medium">空位</p>
-        <p className="text-[9px] text-muted-foreground/20 mt-0.5">等待加入</p>
+        <p className="text-[11px] text-primary/40 mt-2.5 font-semibold">等待加入</p>
+        <p className="text-[9px] text-muted-foreground/30 mt-0.5">点击邀请</p>
       </div>
-      <div className="px-2 pb-2">
-        <div className="w-full h-6 rounded-md border border-dashed border-border/20" />
+      <div className="px-2.5 pb-2.5">
+        <div className="w-full py-1.5 rounded-lg border border-dashed border-primary/15 flex items-center justify-center">
+          <span className="text-[10px] text-primary/30 font-medium">+ 邀请</span>
+        </div>
       </div>
     </div>
   </motion.div>

@@ -207,7 +207,8 @@ const PlayerSeat = ({
                   initial={{ opacity: 0, y: -4, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -4, scale: 0.95 }}
-                  className="absolute left-1/2 -translate-x-1/2 z-50 glass-panel rounded-xl p-1.5 min-w-[130px] mt-1"
+                  className="absolute left-1/2 -translate-x-1/2 z-[100] glass-panel rounded-xl p-1.5 min-w-[130px] mt-1 shadow-xl"
+                  style={{ bottom: '100%', marginBottom: '4px', top: 'auto' }}
                 >
                   <p className="text-[9px] text-muted-foreground/60 px-2 py-1 font-medium">标记临时身份</p>
                   {(Object.keys(ROLE_CONFIG) as Role[]).map((role) => {
