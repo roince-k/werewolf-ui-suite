@@ -10,6 +10,7 @@ interface PlayerSeatProps {
   isSelected: boolean;
   isSpeaking?: boolean;
   tempRole?: Role | null;
+  pickerDirection?: 'up' | 'down';
   onVote: () => void;
   onInspect: () => void;
   onSetTempRole: (role: Role | null) => void;
@@ -27,7 +28,7 @@ const ROLE_CONFIG: Record<Role, { label: string; icon: React.ReactNode; color: s
 const PLAYER_AVATARS = ['🐺', '🦊', '🦉', '🐍', '🦇', '🐻', '🦅', '🐱', '🐰', '🦌', '🐸', '🦁'];
 
 const PlayerSeat = ({
-  player, index, gamePhase, isSelected, isSpeaking, tempRole, onVote, onInspect, onSetTempRole,
+  player, index, gamePhase, isSelected, isSpeaking, tempRole, pickerDirection = 'up', onVote, onInspect, onSetTempRole,
 }: PlayerSeatProps) => {
   const [showRolePicker, setShowRolePicker] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
@@ -207,8 +208,8 @@ const PlayerSeat = ({
                   initial={{ opacity: 0, y: -4, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -4, scale: 0.95 }}
-                  className="absolute left-1/2 -translate-x-1/2 z-[100] glass-panel rounded-xl p-1.5 min-w-[130px] mt-1 shadow-xl"
-                  style={{ bottom: '100%', marginBottom: '4px', top: 'auto' }}
+                  className="absolute left-1/2 -translate-x-1/2 z-[100] glass-panel rounded-xl p-1.5 min-w-[130px] shadow-xl"
+                  style={pickerDirection === 'up' ? { bottom: '100%', marginBottom: '4px' } : { top: '100%', marginTop: '4px' }}
                 >
                   <p className="text-[9px] text-muted-foreground/60 px-2 py-1 font-medium">标记临时身份</p>
                   {(Object.keys(ROLE_CONFIG) as Role[]).map((role) => {
