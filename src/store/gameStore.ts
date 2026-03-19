@@ -230,6 +230,8 @@ export const useGameStore = create<GameState>((set) => ({
   apiKey: '',
   apiModel: 'gpt-4o-mini',
   notes: '',
+  agentTemplates: PRESET_AGENTS,
+  selectedAgentId: 'aggressive',
 
   login: (username) => set({
     currentUser: { id: 'me', username },
@@ -259,4 +261,11 @@ export const useGameStore = create<GameState>((set) => ({
   castVote: (targetNumber) => set((state) => ({
     votes: { ...state.votes, [state.currentUser?.id || 'me']: targetNumber },
   })),
+  addAgentTemplate: (agent) => set((state) => ({
+    agentTemplates: [...state.agentTemplates, { ...agent, id: crypto.randomUUID() }],
+  })),
+  removeAgentTemplate: (id) => set((state) => ({
+    agentTemplates: state.agentTemplates.filter(a => a.id !== id),
+  })),
+  selectAgent: (id) => set({ selectedAgentId: id }),
 }));

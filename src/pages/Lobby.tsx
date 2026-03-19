@@ -44,6 +44,12 @@ const Lobby = () => {
         <nav className="flex gap-1 ml-4">
           <button className="px-3 py-1.5 text-sm rounded-md bg-primary text-primary-foreground">大厅</button>
           <button
+            onClick={() => navigate('/agents')}
+            className="px-3 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          >
+            智能体模板
+          </button>
+          <button
             onClick={() => navigate('/templates')}
             className="px-3 py-1.5 text-sm rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
           >
