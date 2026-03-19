@@ -236,6 +236,7 @@ export const useGameStore = create<GameState>((set) => ({
   notes: '',
   agentTemplates: PRESET_AGENTS,
   selectedAgentId: 'aggressive',
+  isSoloMode: false,
 
   login: (username) => set({
     currentUser: { id: 'me', username },
