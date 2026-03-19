@@ -136,6 +136,11 @@ const Room = () => {
         <div className="h-4 w-px bg-border" />
         <span className="text-sm font-medium text-foreground">{currentRoom?.name || '房间'}</span>
         <span className="text-xs text-muted-foreground">· {currentRoom?.mode || '9人标准局'}</span>
+        {isSoloMode && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20 font-medium">
+            单人模式 · 无限时
+          </span>
+        )}
 
         <div className="flex-1" />
         <button onClick={() => setShowNotes(!showNotes)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
