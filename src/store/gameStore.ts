@@ -155,6 +155,9 @@ export interface GameState {
   agentTemplates: AgentTemplate[];
   selectedAgentId: string | null;
 
+  // Solo mode
+  isSoloMode: boolean;
+
   // Actions
   login: (username: string) => void;
   logout: () => void;
@@ -172,6 +175,7 @@ export interface GameState {
   addAgentTemplate: (agent: Omit<AgentTemplate, 'id'>) => void;
   removeAgentTemplate: (id: string) => void;
   selectAgent: (id: string) => void;
+  setSoloMode: (solo: boolean) => void;
 }
 
 const MOCK_ROOMS: Room[] = [
@@ -232,6 +236,7 @@ export const useGameStore = create<GameState>((set) => ({
   notes: '',
   agentTemplates: PRESET_AGENTS,
   selectedAgentId: 'aggressive',
+  isSoloMode: false,
 
   login: (username) => set({
     currentUser: { id: 'me', username },
@@ -268,4 +273,5 @@ export const useGameStore = create<GameState>((set) => ({
     agentTemplates: state.agentTemplates.filter(a => a.id !== id),
   })),
   selectAgent: (id) => set({ selectedAgentId: id }),
+  setSoloMode: (solo) => set({ isSoloMode: solo }),
 }));

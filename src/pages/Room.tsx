@@ -11,6 +11,7 @@ import NoteDrawer from '@/components/game/NoteDrawer';
 import PlayerSeat from '@/components/game/PlayerSeat';
 import GameBulletin from '@/components/game/GameBulletin';
 import PhaseBanner from '@/components/game/PhaseBanner';
+import NightActionPanel, { type NightAction } from '@/components/game/NightActionPanel';
 
 // Demo game logs
 const DEMO_LOGS: Omit<GameLog, 'id' | 'timestamp'>[] = [
@@ -33,7 +34,7 @@ const Room = () => {
   const {
     currentRoom, isReady, setReady, gamePhase, setGamePhase,
     gameLogs, addGameLog, myRole, showRoleReveal, setShowRoleReveal,
-    gameResult, setGameResult, castVote, notes, setNotes
+    gameResult, setGameResult, castVote, notes, setNotes, isSoloMode
   } = useGameStore();
   const [message, setMessage] = useState('');
   const [showNotes, setShowNotes] = useState(false); // keep for header toggle if needed
@@ -82,6 +83,29 @@ const Room = () => {
     setTempRoles(prev => ({ ...prev, [playerId]: role }));
   };
 
+  const handleNightAction = (action: NightAction) => {
+    const target = players.find(p => p.id === action.targetId);
+    const targetLabel = target ? `${target.number}号 ${target.name}` : '';
+    switch (action.type) {
+      case 'werewolf_kill':
+        addGameLog({ type: 'system', content: `🐺 你选择了袭击 ${targetLabel}` });
+        break;
+      case 'seer_check':
+        addGameLog({ type: 'system', content: `🔮 你查验了 ${targetLabel} 的身份` });
+        break;
+      case 'witch_save':
+        addGameLog({ type: 'system', content: '💊 你使用了解药' });
+        break;
+      case 'witch_poison':
+        addGameLog({ type: 'system', content: `☠️ 你对 ${targetLabel} 使用了毒药` });
+        break;
+    }
+  };
+
+  const handleSkipNight = () => {
+    addGameLog({ type: 'system', content: '你选择了跳过本轮行动' });
+  };
+
   const renderSeat = (player: typeof allSeats[number], i: number) => {
     if (player) {
       return (
@@ -112,6 +136,11 @@ const Room = () => {
         <div className="h-4 w-px bg-border" />
         <span className="text-sm font-medium text-foreground">{currentRoom?.name || '房间'}</span>
         <span className="text-xs text-muted-foreground">· {currentRoom?.mode || '9人标准局'}</span>
+        {isSoloMode && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20 font-medium">
+            单人模式 · 无限时
+          </span>
+        )}
 
         <div className="flex-1" />
         <button onClick={() => setShowNotes(!showNotes)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
@@ -230,6 +259,18 @@ const Room = () => {
               </button>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Night Action Panel */}
+      <AnimatePresence>
+        {gamePhase === 'night' && (
+          <NightActionPanel
+            myRole={myRole || 'seer'}
+            players={players}
+            onAction={handleNightAction}
+            onSkip={handleSkipNight}
+          />
         )}
       </AnimatePresence>
 

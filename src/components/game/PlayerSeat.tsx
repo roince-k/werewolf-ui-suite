@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Vote, Skull, Crown, Bot, Mic, Eye, UserCheck, X, Shield, Ghost, Crosshair, Heart, Zap } from 'lucide-react';
+import { Vote, Skull, Crown, Bot, Mic, UserCheck, X, Shield, Ghost, Crosshair, Heart, Eye } from 'lucide-react';
 import type { Player, GamePhase, Role } from '@/store/gameStore';
 
 interface PlayerSeatProps {
@@ -23,13 +23,30 @@ const ROLE_CONFIG: Record<Role, { label: string; icon: React.ReactNode; color: s
   villager: { label: '平民', icon: <Shield className="w-3 h-3" />, color: 'text-muted-foreground', bg: 'bg-muted/30 border-muted-foreground/20' },
 };
 
+// Diverse default avatars by player number
+const PLAYER_AVATARS = ['🐺', '🦊', '🦉', '🐍', '🦇', '🐻', '🦅', '🐱', '🐰', '🦌', '🐸', '🦁'];
+
 const PlayerSeat = ({
   player, index, gamePhase, isSelected, isSpeaking, tempRole, onVote, onInspect, onSetTempRole,
 }: PlayerSeatProps) => {
-  const [hovered, setHovered] = useState(false);
   const [showRolePicker, setShowRolePicker] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
   const isDead = player.status === 'dead';
   const isVoting = gamePhase === 'voting';
+
+  // Click outside to close role picker
+  useEffect(() => {
+    if (!showRolePicker) return;
+    const handler = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowRolePicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showRolePicker]);
+
+  const avatarEmoji = player.emoji || PLAYER_AVATARS[(player.number - 1) % PLAYER_AVATARS.length];
 
   return (
     <motion.div
@@ -38,21 +55,22 @@ const PlayerSeat = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay: index * 0.05, type: 'spring', stiffness: 300, damping: 22 }}
     >
-      {/* Speaking pulse rings */}
+      {/* Speaking indicator */}
       <AnimatePresence>
         {isSpeaking && !isDead && (
           <>
             <motion.div
-              className="absolute -inset-2 rounded-2xl border border-alive/30"
-              animate={{ scale: [1, 1.06, 1], opacity: [0.5, 0, 0.5] }}
+              className="absolute -inset-2.5 rounded-2xl"
+              style={{ border: '2px solid hsl(var(--alive) / 0.4)' }}
+              animate={{ scale: [1, 1.05, 1], opacity: [0.6, 0, 0.6] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
             <motion.div
-              className="absolute -top-5 left-1/2 -translate-x-1/2 z-30"
+              className="absolute -top-6 left-1/2 -translate-x-1/2 z-30"
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <span className="flex items-center gap-1 bg-alive/20 text-alive text-[9px] px-2 py-0.5 rounded-full border border-alive/30 backdrop-blur-sm whitespace-nowrap">
+              <span className="flex items-center gap-1 bg-alive/20 text-alive text-[9px] px-2.5 py-1 rounded-full border border-alive/30 backdrop-blur-sm whitespace-nowrap font-medium">
                 <Mic className="w-2.5 h-2.5" /> 发言中
               </span>
             </motion.div>
@@ -64,105 +82,109 @@ const PlayerSeat = ({
       <AnimatePresence>
         {isSelected && (
           <motion.div
-            className="absolute -inset-1.5 rounded-2xl border-2 border-primary"
+            className="absolute -inset-2 rounded-2xl"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 1.1, opacity: 0 }}
-            style={{ boxShadow: '0 0 20px hsl(var(--werewolf) / 0.5)' }}
+            style={{
+              border: '2px solid hsl(var(--primary))',
+              boxShadow: '0 0 24px hsl(var(--werewolf) / 0.5)',
+            }}
           />
         )}
       </AnimatePresence>
 
       {/* Main card */}
       <motion.div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => { setHovered(false); setShowRolePicker(false); }}
         onClick={onInspect}
         whileHover={isDead ? {} : { y: -6 }}
         whileTap={isDead ? {} : { scale: 0.97 }}
-        className={`relative w-[clamp(100px,9vw,145px)] cursor-pointer select-none transition-all duration-300 ${
-          isDead ? 'opacity-40 grayscale' : ''
+        className={`relative w-[clamp(108px,10vw,150px)] cursor-pointer select-none transition-all duration-300 ${
+          isDead ? 'opacity-35' : ''
         }`}
       >
         <div
-          className={`relative rounded-xl overflow-hidden border-2 transition-colors duration-300 ${
+          className={`relative rounded-2xl overflow-hidden transition-all duration-300 ${
             isDead
-              ? 'border-destructive/30 bg-destructive/5'
+              ? 'border border-destructive/20 bg-destructive/5 grayscale'
               : isSelected
-              ? 'border-primary/60 bg-primary/10'
-              : hovered
-              ? 'border-accent/40 bg-surface-elevated'
-              : 'border-border/50 bg-surface'
+              ? 'border-2 border-primary/60 bg-gradient-to-b from-primary/8 to-primary/3'
+              : 'border border-border/40 bg-gradient-to-b from-surface-elevated to-surface hover:border-accent/40 hover:shadow-[0_16px_48px_rgba(0,0,0,0.5)]'
           }`}
-          style={!isDead ? {
-            boxShadow: hovered
-              ? '0 16px 48px rgba(0,0,0,0.5), 0 0 24px hsl(var(--moonlight) / 0.08)'
-              : '0 4px 20px rgba(0,0,0,0.4)',
+          style={!isDead && !isSelected ? {
+            boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
           } : undefined}
         >
-          {/* Number badge - top left */}
-          <div className="absolute top-1.5 left-1.5 z-10">
-            <span className="text-[10px] font-bold tabular-nums text-muted-foreground/80 bg-background/60 backdrop-blur-sm w-5 h-5 rounded-md flex items-center justify-center border border-border/40">
-              {player.number}
-            </span>
-          </div>
-
-          {/* Status badges - top right */}
-          <div className="absolute top-1.5 right-1.5 z-10 flex items-center gap-0.5">
-            {player.isOwner && (
-              <span className="w-5 h-5 rounded-md bg-gold/15 flex items-center justify-center border border-gold/30">
-                <Crown className="w-3 h-3 text-gold" />
-              </span>
-            )}
-            {player.isAI && (
-              <span className="w-5 h-5 rounded-md bg-accent/10 flex items-center justify-center border border-accent/20">
-                <Bot className="w-3 h-3 text-accent/70" />
-              </span>
-            )}
-          </div>
-
-          {/* Avatar area */}
-          <div className="pt-10 pb-3 flex flex-col items-center px-3">
-            <div className={`relative w-18 h-18 rounded-full flex items-center justify-center border-2 transition-colors ${
+          {/* Top bar: Number + badges */}
+          <div className="flex items-center justify-between px-2.5 pt-2.5">
+            {/* Player number - prominent */}
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-sm tabular-nums ${
               isDead
-                ? 'border-destructive/40 bg-destructive/10'
+                ? 'bg-destructive/10 text-destructive/50'
+                : 'bg-primary/15 text-primary border border-primary/25'
+            }`}>
+              {player.number}
+            </div>
+
+            {/* Status badges */}
+            <div className="flex items-center gap-1">
+              {player.isOwner && (
+                <span className="w-6 h-6 rounded-lg bg-gold/12 flex items-center justify-center border border-gold/25">
+                  <Crown className="w-3.5 h-3.5 text-gold" />
+                </span>
+              )}
+              {player.isAI && (
+                <span className="w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center border border-accent/20">
+                  <Bot className="w-3.5 h-3.5 text-accent/70" />
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Avatar */}
+          <div className="py-3 flex flex-col items-center px-3">
+            <div className={`relative w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
+              isDead
+                ? 'bg-destructive/8 border border-destructive/20'
                 : isSelected
-                ? 'border-primary/50 bg-primary/10'
-                : 'border-border/40 bg-background/40'
+                ? 'bg-primary/10 border-2 border-primary/30 shadow-[0_0_16px_hsl(var(--primary)/0.2)]'
+                : 'bg-background/50 border border-border/30'
             }`}>
               {isDead ? (
-                <Skull className="w-7 h-7 text-destructive" />
+                <Skull className="w-8 h-8 text-destructive/60" />
               ) : (
-                <span className="text-3xl leading-none">{player.emoji}</span>
+                <span className="text-3xl leading-none filter drop-shadow-sm">{avatarEmoji}</span>
               )}
 
               {/* Ready dot */}
               {!isDead && gamePhase === 'waiting' && (
-                <span className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-surface ${
-                  player.isReady ? 'bg-alive' : 'bg-muted-foreground/30'
+                <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-[2.5px] border-surface transition-colors ${
+                  player.isReady ? 'bg-alive shadow-[0_0_8px_hsl(var(--alive)/0.5)]' : 'bg-muted-foreground/25'
                 }`} />
               )}
             </div>
 
             {/* Player name */}
-            <p className={`text-sm font-semibold text-center mt-2.5 w-full truncate leading-tight ${
-              isDead ? 'text-destructive/50 line-through' : 'text-foreground/90'
+            <p className={`text-[13px] font-bold text-center mt-2.5 w-full truncate leading-tight ${
+              isDead ? 'text-destructive/40 line-through' : 'text-foreground'
             }`}>
               {player.name}
             </p>
 
-            {/* AI personality or human label */}
-            <p className="text-[9px] text-muted-foreground/50 mt-0.5 truncate w-full text-center">
-              {player.isAI ? `🤖 ${player.personality || 'AI'}` : '👤 真人'}
+            {/* Label */}
+            <p className={`text-[10px] mt-1 truncate w-full text-center font-medium ${
+              player.isAI ? 'text-accent/50' : 'text-muted-foreground/40'
+            }`}>
+              {player.isAI ? `🤖 ${player.personality || 'AI'}` : '👤 真人玩家'}
             </p>
           </div>
 
-          {/* Temp role tag area */}
-          <div className="px-3 pb-3">
+          {/* Temp role tag */}
+          <div className="px-2.5 pb-2.5" ref={pickerRef}>
             {tempRole ? (
               <button
                 onClick={(e) => { e.stopPropagation(); onSetTempRole(null); }}
-                className={`w-full flex items-center justify-center gap-1 text-[10px] font-medium py-1 rounded-md border transition-colors ${ROLE_CONFIG[tempRole].bg} ${ROLE_CONFIG[tempRole].color}`}
+                className={`w-full flex items-center justify-center gap-1.5 text-[10px] font-semibold py-1.5 rounded-lg border transition-colors ${ROLE_CONFIG[tempRole].bg} ${ROLE_CONFIG[tempRole].color}`}
               >
                 {ROLE_CONFIG[tempRole].icon}
                 {ROLE_CONFIG[tempRole].label}
@@ -171,12 +193,43 @@ const PlayerSeat = ({
             ) : (
               <button
                 onClick={(e) => { e.stopPropagation(); setShowRolePicker(!showRolePicker); }}
-                className="w-full flex items-center justify-center gap-1 text-[10px] text-muted-foreground/40 py-1 rounded-md border border-dashed border-border/30 hover:border-accent/30 hover:text-muted-foreground/60 transition-colors"
+                className="w-full flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/35 py-1.5 rounded-lg border border-dashed border-border/25 hover:border-accent/30 hover:text-muted-foreground/60 transition-colors"
               >
                 <UserCheck className="w-3 h-3" />
                 标记身份
               </button>
             )}
+
+            {/* Role picker dropdown - inside ref container */}
+            <AnimatePresence>
+              {showRolePicker && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.95 }}
+                  className="absolute left-1/2 -translate-x-1/2 z-50 glass-panel rounded-xl p-1.5 min-w-[130px] mt-1"
+                >
+                  <p className="text-[9px] text-muted-foreground/60 px-2 py-1 font-medium">标记临时身份</p>
+                  {(Object.keys(ROLE_CONFIG) as Role[]).map((role) => {
+                    const cfg = ROLE_CONFIG[role];
+                    return (
+                      <button
+                        key={role}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSetTempRole(role);
+                          setShowRolePicker(false);
+                        }}
+                        className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11px] font-medium transition-colors hover:bg-muted/50 ${cfg.color}`}
+                      >
+                        {cfg.icon}
+                        {cfg.label}
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -188,12 +241,12 @@ const PlayerSeat = ({
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
               onClick={(e) => { e.stopPropagation(); onVote(); }}
-              className={`absolute -bottom-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-colors z-20 ${
+              className={`absolute -bottom-3.5 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-colors z-20 ${
                 isSelected
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-primary text-primary-foreground shadow-[0_0_16px_hsl(var(--primary)/0.4)]'
                   : 'bg-secondary border border-border text-muted-foreground hover:text-foreground hover:border-primary/50'
               }`}
-              whileHover={{ scale: 1.2 }}
+              whileHover={{ scale: 1.15 }}
               whileTap={{ scale: 0.85 }}
             >
               <Vote className="w-4 h-4" />
@@ -201,37 +254,6 @@ const PlayerSeat = ({
           )}
         </AnimatePresence>
       </motion.div>
-
-      {/* Role picker dropdown */}
-      <AnimatePresence>
-        {showRolePicker && (
-          <motion.div
-            initial={{ opacity: 0, y: -4, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.95 }}
-            className="absolute top-full mt-1 left-1/2 -translate-x-1/2 z-50 glass-panel rounded-xl p-1.5 min-w-[120px]"
-          >
-            <p className="text-[9px] text-muted-foreground/60 px-2 py-1 font-medium">标记临时身份</p>
-            {(Object.keys(ROLE_CONFIG) as Role[]).map((role) => {
-              const cfg = ROLE_CONFIG[role];
-              return (
-                <button
-                  key={role}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSetTempRole(role);
-                    setShowRolePicker(false);
-                  }}
-                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-colors hover:bg-muted/50 ${cfg.color}`}
-                >
-                  {cfg.icon}
-                  {cfg.label}
-                </button>
-              );
-            })}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };
