@@ -109,6 +109,32 @@ const Room = () => {
     addGameLog({ type: 'system', content: '你选择了跳过本轮行动' });
   };
 
+  const handleInviteAgent = (agent: AgentTemplate) => {
+    if (inviteSeatNumber === null) return;
+    const newPlayer = {
+      id: crypto.randomUUID(),
+      number: inviteSeatNumber,
+      name: agent.name,
+      isAI: true,
+      status: 'alive' as const,
+      isReady: true,
+      isOwner: false,
+      emoji: agent.emoji,
+      personality: agent.personality,
+    };
+    // In a real app this would update the room via backend
+    addGameLog({ type: 'system', content: `🤖 ${agent.name} 加入了 ${inviteSeatNumber}号位` });
+    setInviteSeatNumber(null);
+    toast.success(`${agent.name} 已加入 ${inviteSeatNumber}号位`);
+  };
+
+  const handleInviteLobbyUser = (username: string) => {
+    if (inviteSeatNumber === null) return;
+    addGameLog({ type: 'system', content: `📨 已向 ${username} 发送邀请` });
+    setInviteSeatNumber(null);
+    toast.success(`已邀请 ${username}`);
+  };
+
   const renderSeat = (player: typeof allSeats[number], i: number) => {
     if (player) {
       return (
@@ -125,7 +151,14 @@ const Room = () => {
         />
       );
     }
-    return <EmptySeat key={`empty-${i}`} number={i + 1} index={i} />;
+    return (
+      <EmptySeat
+        key={`empty-${i}`}
+        number={i + 1}
+        index={i}
+        onClick={() => setInviteSeatNumber(i + 1)}
+      />
+    );
   };
 
   return (
