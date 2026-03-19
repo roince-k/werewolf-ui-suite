@@ -34,7 +34,7 @@ const Room = () => {
   const {
     currentRoom, isReady, setReady, gamePhase, setGamePhase,
     gameLogs, addGameLog, myRole, showRoleReveal, setShowRoleReveal,
-    gameResult, setGameResult, castVote, notes, setNotes
+    gameResult, setGameResult, castVote, notes, setNotes, isSoloMode
   } = useGameStore();
   const [message, setMessage] = useState('');
   const [showNotes, setShowNotes] = useState(false); // keep for header toggle if needed
