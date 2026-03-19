@@ -262,6 +262,18 @@ const Room = () => {
         )}
       </AnimatePresence>
 
+      {/* Night Action Panel */}
+      <AnimatePresence>
+        {gamePhase === 'night' && (
+          <NightActionPanel
+            myRole={myRole || 'seer'}
+            players={players}
+            onAction={handleNightAction}
+            onSkip={handleSkipNight}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Game End */}
       {gameResult && <GameEndOverlay />}
 
