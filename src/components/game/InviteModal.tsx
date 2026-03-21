@@ -9,6 +9,7 @@ interface InviteModalProps {
   onClose: () => void;
   onInviteAgent: (agent: AgentTemplate) => void;
   onInviteLobbyUser: (username: string) => void;
+  onFillAllAI?: () => void;
 }
 
 const InviteModal = ({ seatNumber, onClose, onInviteAgent, onInviteLobbyUser }: InviteModalProps) => {
