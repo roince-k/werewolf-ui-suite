@@ -1,5 +1,6 @@
+import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useNavigate, useRef } from '@/lib/landing-imports';
+import { useNavigate } from 'react-router-dom';
 import {
   Zap, Bot, Puzzle, Swords, Shield, Eye, Brain,
   Layers, Users, Cpu, ChevronDown, Sparkles,
