@@ -12,7 +12,7 @@ interface InviteModalProps {
   onFillAllAI?: () => void;
 }
 
-const InviteModal = ({ seatNumber, onClose, onInviteAgent, onInviteLobbyUser }: InviteModalProps) => {
+const InviteModal = ({ seatNumber, onClose, onInviteAgent, onInviteLobbyUser, onFillAllAI }: InviteModalProps) => {
   const { lobbyUsers, agentTemplates } = useGameStore();
   const [tab, setTab] = useState<'humans' | 'agents'>('agents');
   const [copied, setCopied] = useState(false);
