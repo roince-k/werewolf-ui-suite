@@ -379,6 +379,7 @@ const Room = () => {
             onClose={() => setInviteSeatNumber(null)}
             onInviteAgent={handleInviteAgent}
             onInviteLobbyUser={handleInviteLobbyUser}
+            onFillAllAI={handleFillAllAI}
           />
         )}
       </AnimatePresence>
