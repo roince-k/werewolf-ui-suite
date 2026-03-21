@@ -131,6 +131,35 @@ const Room = () => {
     toast.success(`${agent.name} 已加入 ${seatNum}号位`);
   };
 
+  const handleFillAllAI = () => {
+    const { agentTemplates } = useGameStore.getState();
+    const emptySeats = allSeats
+      .map((s, i) => (s ? null : i + 1))
+      .filter((n): n is number => n !== null);
+    if (emptySeats.length === 0) {
+      toast.info('所有座位已满');
+      return;
+    }
+    const shuffled = [...agentTemplates].sort(() => Math.random() - 0.5);
+    emptySeats.forEach((seatNum, idx) => {
+      const agent = shuffled[idx % shuffled.length];
+      const newPlayer: import('@/store/gameStore').Player = {
+        id: crypto.randomUUID(),
+        number: seatNum,
+        name: agent.name,
+        isAI: true,
+        status: 'alive',
+        isReady: true,
+        isOwner: false,
+        emoji: agent.emoji,
+        personality: agent.personality,
+      };
+      addPlayerToRoom(newPlayer);
+    });
+    addGameLog({ type: 'system', content: `🤖 已随机邀请 ${emptySeats.length} 个AI智能体` });
+    toast.success(`已填满 ${emptySeats.length} 个空座位`);
+  };
+
   const handleInviteLobbyUser = (username: string) => {
     if (inviteSeatNumber === null) return;
     addGameLog({ type: 'system', content: `📨 已向 ${username} 发送邀请` });
@@ -350,6 +379,7 @@ const Room = () => {
             onClose={() => setInviteSeatNumber(null)}
             onInviteAgent={handleInviteAgent}
             onInviteLobbyUser={handleInviteLobbyUser}
+            onFillAllAI={handleFillAllAI}
           />
         )}
       </AnimatePresence>
