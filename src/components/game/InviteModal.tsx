@@ -136,10 +136,10 @@ const InviteModal = ({ seatNumber, onClose, onInviteAgent, onInviteLobbyUser, on
             {copied ? '已复制' : '复制链接'}
           </button>
           <button
-            onClick={handleRandomAgent}
+            onClick={() => { if (onFillAllAI) { onFillAllAI(); onClose(); } else { handleRandomAgent(); } }}
             className="flex-1 btn-ritual flex items-center justify-center gap-1.5 py-2 text-sm"
           >
-            <Shuffle className="w-3.5 h-3.5" /> 一键邀请AI
+            <Shuffle className="w-3.5 h-3.5" /> {onFillAllAI ? '一键填满AI' : '随机邀请AI'}
           </button>
         </div>
       </motion.div>
