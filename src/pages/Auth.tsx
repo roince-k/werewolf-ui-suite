@@ -54,7 +54,7 @@ const Auth = () => {
       >
         {/* Logo */}
         <h1 className="display-title text-4xl text-center text-foreground mb-8 text-glow-moonlight">
-          WEREWOLF
+          荒诞推理<span className="text-werewolf ml-2">Charade</span>
         </h1>
 
         {/* Card */}

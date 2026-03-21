@@ -44,7 +44,7 @@ const GameLayout = ({ activeGame, onGameChange, children }: GameLayoutProps) => 
         <div className="h-14 border-b border-sidebar-border flex items-center px-3 gap-2 shrink-0">
           {!collapsed && (
             <h1 className="display-title text-lg text-sidebar-foreground tracking-tight flex-1">
-              GAMES
+              Charade
             </h1>
           )}
           <button
