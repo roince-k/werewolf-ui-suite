@@ -9,7 +9,7 @@ const CreateRoomModal = ({ onClose }: { onClose: () => void }) => {
   const { joinRoom, setSoloMode } = useGameStore();
   const [name, setName] = useState('');
   const [mode, setMode] = useState('9');
-  const [isSolo, setIsSolo] = useState(false);
+  const [isSolo, setIsSolo] = useState(true);
 
   const handleCreate = () => {
     if (!name.trim()) return;
