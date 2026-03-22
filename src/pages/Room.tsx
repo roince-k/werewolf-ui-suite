@@ -15,6 +15,8 @@ import GameBulletin from '@/components/game/GameBulletin';
 import PhaseBanner from '@/components/game/PhaseBanner';
 import NightActionPanel, { type NightAction } from '@/components/game/NightActionPanel';
 import InviteModal from '@/components/game/InviteModal';
+import WolfExplodeButton from '@/components/game/WolfExplodeButton';
+import SheriffElection from '@/components/game/SheriffElection';
 
 // TODO: MOCK DATA — 替换为真实游戏日志（从游戏引擎/后端获取）
 const DEMO_LOGS: Omit<GameLog, 'id' | 'timestamp'>[] = [
@@ -38,19 +40,23 @@ const Room = () => {
     currentRoom, isReady, setReady, gamePhase, setGamePhase,
     gameLogs, addGameLog, myRole, showRoleReveal, setShowRoleReveal,
     gameResult, setGameResult, castVote, notes, setNotes, isSoloMode,
-    addPlayerToRoom
+    addPlayerToRoom, localGuesses, setLocalGuess, sheriffId, myPlayerId,
   } = useGameStore();
   const [message, setMessage] = useState('');
-  const [showNotes, setShowNotes] = useState(false); // keep for header toggle if needed
+  const [showNotes, setShowNotes] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteSeatNumber, setInviteSeatNumber] = useState<number | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
   const [inspectedPlayer, setInspectedPlayer] = useState<number | null>(null);
-  const [tempRoles, setTempRoles] = useState<Record<string, Role | null>>({});
+  // Sheriff election local state (F5)
+  const [sheriffPhase, setSheriffPhase] = useState<'nominate' | 'speech' | 'vote' | 'transfer' | null>(null);
+  const [candidates, setCandidates] = useState<number[]>([]);
+  const [withdrawnCandidates, setWithdrawnCandidates] = useState<number[]>([]);
 
   const players = currentRoom?.players || [];
   const totalSeats = currentRoom?.maxPlayers || 9;
+  const is12Player = totalSeats === 12;
 
   const allSeats = Array.from({ length: totalSeats }, (_, i) => players[i] || null);
 
@@ -58,6 +64,15 @@ const Room = () => {
   const midpoint = Math.ceil(totalSeats / 2);
   const topRow = allSeats.slice(0, midpoint);
   const bottomRow = allSeats.slice(midpoint);
+
+  // Is the current phase a night phase?
+  const isNightPhase = gamePhase === 'night' || gamePhase === 'night_werewolf' || gamePhase === 'night_seer' || gamePhase === 'night_witch' || gamePhase === 'night_guard';
+  // Is the current phase a day/discussion phase?
+  const isDayPhase = gamePhase === 'day' || gamePhase === 'day_discussion' || gamePhase === 'day_wolf_explode_available';
+  // Can send messages?
+  const canSendMessage = isDayPhase;
+  // Show wolf explode button?
+  const showExplodeButton = gamePhase === 'day_wolf_explode_available' || isDayPhase;
 
   const handleStartGame = () => {
     setGamePhase('night');
@@ -84,10 +99,6 @@ const Room = () => {
     castVote(targetNum);
   };
 
-  const handleSetTempRole = (playerId: string, role: Role | null) => {
-    setTempRoles(prev => ({ ...prev, [playerId]: role }));
-  };
-
   const handleNightAction = (action: NightAction) => {
     const target = players.find(p => p.id === action.targetId);
     const targetLabel = target ? `${target.number}号 ${target.name}` : '';
@@ -104,11 +115,50 @@ const Room = () => {
       case 'witch_poison':
         addGameLog({ type: 'system', content: `☠️ 你对 ${targetLabel} 使用了毒药` });
         break;
+      case 'guard_protect':
+        addGameLog({ type: 'system', content: `🛡️ 你守护了 ${targetLabel}` });
+        break;
     }
   };
 
   const handleSkipNight = () => {
     addGameLog({ type: 'system', content: '你选择了跳过本轮行动' });
+  };
+
+  const handleWolfExplode = (targetNumber?: number) => {
+    if (targetNumber) {
+      const target = players.find(p => p.number === targetNumber);
+      addGameLog({ type: 'explode', content: `💥 你自爆了！并带走了 ${target?.number}号 ${target?.name}` });
+    } else {
+      addGameLog({ type: 'explode', content: '💥 你自爆了！' });
+    }
+    // TODO: Send WOLF_EXPLODE socket event
+  };
+
+  // Sheriff election handlers (F5)
+  const handleSheriffNominate = () => {
+    // TODO: Send SHERIFF_NOMINATE socket event
+    const myNumber = players.find(p => p.id === myPlayerId)?.number;
+    if (myNumber) setCandidates(prev => [...prev, myNumber]);
+    addGameLog({ type: 'sheriff', content: `🎖️ 你申请了上警` });
+  };
+
+  const handleSheriffWithdraw = () => {
+    const myNumber = players.find(p => p.id === myPlayerId)?.number;
+    if (myNumber) setWithdrawnCandidates(prev => [...prev, myNumber]);
+    addGameLog({ type: 'sheriff', content: `🎖️ 你退水了` });
+  };
+
+  const handleSheriffVote = (targetNumber: number) => {
+    addGameLog({ type: 'sheriff', content: `🎖️ 你投票给了 ${targetNumber}号` });
+  };
+
+  const handleSheriffTransfer = (targetNumber: number) => {
+    addGameLog({ type: 'sheriff', content: `🎖️ 你将警徽移交给了 ${targetNumber}号` });
+  };
+
+  const handleSheriffDestroy = () => {
+    addGameLog({ type: 'sheriff', content: `🎖️ 你撕毁了警徽` });
   };
 
   const handleInviteAgent = (agent: AgentTemplate) => {
@@ -169,6 +219,7 @@ const Room = () => {
 
   const renderSeat = (player: typeof allSeats[number], i: number, isTopRow: boolean) => {
     if (player) {
+      const isSelf = player.id === myPlayerId;
       return (
         <PlayerSeat
           key={player.id}
@@ -176,11 +227,14 @@ const Room = () => {
           index={i}
           gamePhase={gamePhase}
           isSelected={selectedTarget === player.number}
-          tempRole={tempRoles[player.id] || null}
+          isSelf={isSelf}
+          selfRole={isSelf ? myRole : null}
+          localGuess={localGuesses[player.id] || null}
+          gameEnded={gamePhase === 'ended'}
           pickerDirection={isTopRow ? 'down' : 'up'}
           onVote={() => handleVote(player.number)}
           onInspect={() => setInspectedPlayer(player.number)}
-          onSetTempRole={(role) => handleSetTempRole(player.id, role)}
+          onSetLocalGuess={(role) => setLocalGuess(player.id, role)}
         />
       );
     }
@@ -193,6 +247,19 @@ const Room = () => {
       />
     );
   };
+
+  // Get role info for reveal (data-driven, no hardcoded defaults)
+  const ROLE_REVEAL_CONFIG: Record<Role, { emoji: string; label: string; faction: string; description: string }> = {
+    werewolf: { emoji: '🐺', label: '狼人', faction: '狼人阵营', description: '每晚与同伴商议击杀一名玩家' },
+    white_wolf_king: { emoji: '👑', label: '白狼王', faction: '狼人阵营', description: '白天可自爆并带走一名玩家' },
+    seer: { emoji: '🔮', label: '预言家', faction: '神职阵营', description: '每晚可以查验一名玩家的身份' },
+    witch: { emoji: '🧪', label: '女巫', faction: '神职阵营', description: '拥有解药和毒药各一瓶' },
+    hunter: { emoji: '🏹', label: '猎人', faction: '神职阵营', description: '被淘汰时可开枪带走一人' },
+    guard: { emoji: '🛡️', label: '守卫', faction: '神职阵营', description: '每晚可守护一名玩家免受狼人攻击' },
+    villager: { emoji: '👤', label: '平民', faction: '好人阵营', description: '没有特殊技能，依靠推理和投票' },
+  };
+
+  const roleRevealInfo = myRole ? ROLE_REVEAL_CONFIG[myRole] : null;
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
@@ -208,6 +275,11 @@ const Room = () => {
         {isSoloMode && (
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent border border-accent/20 font-medium">
             单人模式 · 无限时
+          </span>
+        )}
+        {sheriffId && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/10 text-gold border border-gold/20 font-medium">
+            ⭐ 警长: {sheriffId}号
           </span>
         )}
 
@@ -261,19 +333,41 @@ const Room = () => {
                   开始游戏
                 </button>
               </div>
+            ) : gamePhase === 'last_words' ? (
+              /* F3: Last words input for eliminated player */
+              <div className="flex gap-2">
+                <input
+                  value={message}
+                  onChange={e => setMessage(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+                  placeholder="发表你的遗言..."
+                  className="input-ritual flex-1 text-sm py-2.5"
+                />
+                <button onClick={handleSendMessage} className="btn-ritual px-4 py-2.5">
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
             ) : gamePhase !== 'ended' ? (
               <div className="flex gap-2">
                 <input
                   value={message}
                   onChange={e => setMessage(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                  placeholder={gamePhase === 'day' ? '发表你的看法...' : '夜晚静默中...'}
-                  disabled={gamePhase === 'night' || gamePhase === 'voting'}
+                  placeholder={isDayPhase ? '发表你的看法...' : '夜晚静默中...'}
+                  disabled={!canSendMessage}
                   className="input-ritual flex-1 text-sm py-2.5"
                 />
+                {/* F4: Wolf explode button during day phase */}
+                {showExplodeButton && (
+                  <WolfExplodeButton
+                    myRole={myRole}
+                    players={players}
+                    onExplode={handleWolfExplode}
+                  />
+                )}
                 <button
                   onClick={handleSendMessage}
-                  disabled={gamePhase !== 'day'}
+                  disabled={!canSendMessage}
                   className="btn-ritual px-4 py-2.5 disabled:opacity-50"
                 >
                   <Send className="w-4 h-4" />
@@ -301,9 +395,9 @@ const Room = () => {
         </aside>
       </div>
 
-      {/* Role Reveal */}
+      {/* Role Reveal — data-driven, no hardcoded role */}
       <AnimatePresence>
-        {showRoleReveal && (
+        {showRoleReveal && roleRevealInfo && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -319,10 +413,10 @@ const Room = () => {
               onClick={e => e.stopPropagation()}
             >
               <p className="text-sm text-muted-foreground mb-4">你的身份</p>
-              <span className="text-6xl block mb-4">🔮</span>
-              <h2 className="display-title text-3xl text-foreground mb-2">预言家</h2>
-              <p className="text-sm text-accent mb-6">Seer · 神职阵营</p>
-              <p className="text-sm text-muted-foreground mb-6">每晚可以查验一名玩家的身份</p>
+              <span className="text-6xl block mb-4">{roleRevealInfo.emoji}</span>
+              <h2 className="display-title text-3xl text-foreground mb-2">{roleRevealInfo.label}</h2>
+              <p className="text-sm text-accent mb-6">{roleRevealInfo.faction}</p>
+              <p className="text-sm text-muted-foreground mb-6">{roleRevealInfo.description}</p>
               <button onClick={() => setShowRoleReveal(false)} className="btn-ritual text-sm">
                 我知道了
               </button>
@@ -331,14 +425,38 @@ const Room = () => {
         )}
       </AnimatePresence>
 
-      {/* Night Action Panel */}
+      {/* Night Action Panel — F3: driven by currentPhase + myRole */}
       <AnimatePresence>
-        {gamePhase === 'night' && (
+        {isNightPhase && (
           <NightActionPanel
-            myRole={myRole || 'seer'}
+            myRole={myRole}
+            currentPhase={gamePhase}
             players={players}
             onAction={handleNightAction}
             onSkip={handleSkipNight}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* F5: Sheriff Election (12-player mode) */}
+      <AnimatePresence>
+        {(gamePhase === 'sheriff_election' || gamePhase === 'sheriff_speech' || gamePhase === 'sheriff_vote' || sheriffPhase === 'transfer') && (
+          <SheriffElection
+            phase={
+              sheriffPhase === 'transfer' ? 'transfer' :
+              gamePhase === 'sheriff_election' ? 'nominate' :
+              gamePhase === 'sheriff_speech' ? 'speech' : 'vote'
+            }
+            players={players}
+            candidates={candidates}
+            withdrawnCandidates={withdrawnCandidates}
+            isSelfCandidate={candidates.includes(players.find(p => p.id === myPlayerId)?.number ?? -1)}
+            isSelfSheriff={sheriffPhase === 'transfer'}
+            onNominate={handleSheriffNominate}
+            onWithdraw={handleSheriffWithdraw}
+            onVote={handleSheriffVote}
+            onTransfer={handleSheriffTransfer}
+            onDestroy={handleSheriffDestroy}
           />
         )}
       </AnimatePresence>
@@ -358,13 +476,56 @@ const Room = () => {
             <div className="absolute inset-0 bg-void/50" />
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute top-12 right-20 glass-panel rounded-xl p-4 w-80 max-h-96 overflow-y-auto" onClick={e => e.stopPropagation()}>
               <h3 className="display-title text-lg text-foreground mb-3">游戏规则</h3>
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <p>• 4狼人 + 1预言家 + 1女巫 + 1猎人 + 5平民</p>
-                <p>• 狼人夜间刀人，预言家查验身份</p>
-                <p>• 女巫有解药和毒药各一瓶</p>
-                <p>• 猎人被淘汰时可开枪带走一人</p>
-                <p>• 白天讨论后公投放逐一名玩家</p>
-                <p>• 狼全灭→好人胜；神/民全灭→狼人胜</p>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                <div>
+                  <p className="font-medium text-foreground/80 mb-1">角色配置</p>
+                  {is12Player ? (
+                    <p>• 3狼人 + 1白狼王 + 1预言家 + 1女巫 + 1猎人 + 1守卫 + 4平民</p>
+                  ) : (
+                    <p>• 4狼人 + 1预言家 + 1女巫 + 1猎人 + 5平民</p>
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium text-foreground/80 mb-1">基本规则</p>
+                  <p>• 狼人夜间刀人，预言家查验身份</p>
+                  <p>• 女巫有解药和毒药各一瓶</p>
+                  <p>• 猎人被淘汰时可开枪带走一人</p>
+                  {is12Player && <p>• 守卫每晚可守护一名玩家</p>}
+                  <p>• 白天讨论后公投放逐一名玩家</p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground/80 mb-1">胜利条件</p>
+                  <p>• 狼全灭→好人胜</p>
+                  <p>• 神/民全灭（屠边）→狼人胜</p>
+                  <p>• 存活狼人≥存活非狼→狼人胜</p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground/80 mb-1">遗言规则</p>
+                  <p>• 首夜死亡→有遗言</p>
+                  <p>• 非首夜夜晚死亡→无遗言</p>
+                  <p>• 白天出局→有遗言</p>
+                  <p>• 被白狼王自爆带走→无遗言</p>
+                </div>
+                {is12Player && (
+                  <>
+                    <div>
+                      <p className="font-medium text-foreground/80 mb-1">白狼王</p>
+                      <p>• 白天可自爆并带走一名玩家</p>
+                      <p>• 被毒杀或枪击时不可自爆</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground/80 mb-1">警长系统</p>
+                      <p>• 仅首日白天触发竞选</p>
+                      <p>• 警长投票权重1.5票</p>
+                      <p>• 死亡时可移交或撕毁警徽</p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground/80 mb-1">特殊规则</p>
+                      <p>• 同守同救→奶穿（玩家死亡）</p>
+                      <p>• 狼刀在先：同时满足时狼人胜</p>
+                    </div>
+                  </>
+                )}
               </div>
             </motion.div>
           </motion.div>
