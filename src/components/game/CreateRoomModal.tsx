@@ -6,7 +6,7 @@ import { useGameStore } from '@/store/gameStore';
 
 const CreateRoomModal = ({ onClose }: { onClose: () => void }) => {
   const navigate = useNavigate();
-  const { joinRoom, setSoloMode } = useGameStore();
+  const { createRoom, setSoloMode } = useGameStore();
   const [name, setName] = useState('');
   const [mode, setMode] = useState('9');
   const [isSolo, setIsSolo] = useState(true);
@@ -14,7 +14,7 @@ const CreateRoomModal = ({ onClose }: { onClose: () => void }) => {
   const handleCreate = () => {
     if (!name.trim()) return;
     setSoloMode(isSolo);
-    joinRoom('1');
+    createRoom(name.trim(), Number(mode));
     onClose();
     navigate('/room');
   };
