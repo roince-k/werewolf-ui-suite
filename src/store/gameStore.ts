@@ -185,6 +185,7 @@ export interface GameState {
   logout: () => void;
   setRoomFilter: (filter: 'all' | 'waiting' | 'playing' | 'mine') => void;
   joinRoom: (roomId: string) => void;
+  createRoom: (name: string, maxPlayers: number) => void;
   leaveRoom: () => void;
   setReady: (ready: boolean) => void;
   setGamePhase: (phase: GamePhase) => void;
@@ -285,6 +286,32 @@ export const useGameStore = create<GameState>((set) => ({
     const room = state.rooms.find(r => r.id === roomId);
     if (!room) return {};
     return { currentRoom: room, myPlayerId: state.currentUser?.id || null };
+  }),
+  createRoom: (name, maxPlayers) => set((state) => {
+    const modeLabel = maxPlayers === 12 ? '12人标准局' : '9人标准局';
+    const newRoom: Room = {
+      id: crypto.randomUUID(),
+      name,
+      mode: modeLabel,
+      maxPlayers,
+      status: 'waiting',
+      ownerId: state.currentUser?.id || 'me',
+      players: [{
+        id: state.currentUser?.id || 'me',
+        number: 1,
+        name: state.currentUser?.username || '玩家',
+        isAI: false,
+        status: 'alive',
+        isReady: false,
+        isOwner: true,
+        emoji: '👤',
+      }],
+    };
+    return {
+      rooms: [...state.rooms, newRoom],
+      currentRoom: newRoom,
+      myPlayerId: state.currentUser?.id || 'me',
+    };
   }),
   leaveRoom: () => set({ currentRoom: null, myPlayerId: null, isReady: false, gamePhase: 'waiting', gameLogs: [], myRole: null, localGuesses: {}, sheriffId: null }),
   setReady: (ready) => set({ isReady: ready }),
