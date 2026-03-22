@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, Eye, EyeOff } from 'lucide-react';
+import { X, Eye, EyeOff, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { useGameStore } from '@/store/gameStore';
 
 const API_CONFIGS: Record<string, { baseUrl: string; models: string[] }> = {
@@ -30,6 +30,9 @@ const ApiSettingsModal = ({ onClose }: { onClose: () => void }) => {
   const [model, setModel] = useState(apiModel);
   const [baseUrl, setBaseUrl] = useState(API_CONFIGS[apiProvider]?.baseUrl || '');
   const [showKey, setShowKey] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<'success' | 'error' | null>(null);
+  const [testMessage, setTestMessage] = useState('');
 
   const handleProviderChange = (p: string) => {
     setProvider(p);
@@ -37,6 +40,45 @@ const ApiSettingsModal = ({ onClose }: { onClose: () => void }) => {
     if (config) {
       setBaseUrl(config.baseUrl);
       setModel(config.models[0]);
+    }
+    setTestResult(null);
+  };
+
+  const handleTestConnection = async () => {
+    if (!key.trim()) {
+      setTestResult('error');
+      setTestMessage('请先输入 API Key');
+      return;
+    }
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const url = `${baseUrl.replace(/\/+$/, '')}/chat/completions`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${key}`,
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [{ role: 'user', content: 'Hi' }],
+          max_tokens: 5,
+        }),
+      });
+      if (res.ok) {
+        setTestResult('success');
+        setTestMessage('连接成功！');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setTestResult('error');
+        setTestMessage(`连接失败 (${res.status}): ${data?.error?.message || '未知错误'}`);
+      }
+    } catch (err: any) {
+      setTestResult('error');
+      setTestMessage(`网络错误: ${err.message || '无法连接'}`);
+    } finally {
+      setTesting(false);
     }
   };
 
@@ -109,16 +151,44 @@ const ApiSettingsModal = ({ onClose }: { onClose: () => void }) => {
 
           <div>
             <label className="block text-sm text-muted-foreground mb-1.5">模型名称</label>
-            <select
+            <input
               value={model}
               onChange={e => setModel(e.target.value)}
+              placeholder="输入模型名称，如 gpt-4o-mini"
               className="input-ritual text-sm"
-            >
+              list="model-suggestions"
+            />
+            <datalist id="model-suggestions">
               {config?.models.map(m => (
-                <option key={m} value={m}>{m}</option>
+                <option key={m} value={m} />
               ))}
-            </select>
+            </datalist>
+            <p className="text-xs text-muted-foreground mt-1">可从建议中选择，或自行输入任意模型名称</p>
           </div>
+
+          {/* Test Connection */}
+          <button
+            onClick={handleTestConnection}
+            disabled={testing}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors disabled:opacity-50"
+          >
+            {testing ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> 测试中...</>
+            ) : (
+              '🔗 测试连接'
+            )}
+          </button>
+
+          {testResult && (
+            <div className={`flex items-start gap-2 text-sm p-3 rounded-lg ${
+              testResult === 'success' 
+                ? 'bg-alive/10 text-alive' 
+                : 'bg-destructive/10 text-destructive'
+            }`}>
+              {testResult === 'success' ? <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" /> : <XCircle className="w-4 h-4 mt-0.5 shrink-0" />}
+              <span>{testMessage}</span>
+            </div>
+          )}
 
           <button onClick={handleSave} className="btn-ritual w-full mt-2 text-sm">
             保存设置
