@@ -241,6 +241,7 @@ export const useGameStore = create<GameState>((set) => ({
   selectedAgentId: 'aggressive',
   isSoloMode: false,
 
+  // TODO: MOCK DATA — 登录逻辑为本地模拟，需替换为真实认证（OAuth / JWT）
   login: (username) => set({
     currentUser: { id: 'me', username },
     isLoggedIn: true,
