@@ -1,8 +1,16 @@
 import { create } from 'zustand';
 
-export type Role = 'werewolf' | 'seer' | 'witch' | 'hunter' | 'villager';
-export type GamePhase = 'waiting' | 'night' | 'day' | 'voting' | 'ended';
+export type Role = 'werewolf' | 'white_wolf_king' | 'seer' | 'witch' | 'hunter' | 'guard' | 'villager';
+export type GamePhase =
+  | 'waiting'
+  | 'night' | 'night_werewolf' | 'night_seer' | 'night_witch' | 'night_guard'
+  | 'day' | 'day_discussion' | 'day_wolf_explode_available'
+  | 'voting' | 'last_words'
+  | 'sheriff_election' | 'sheriff_speech' | 'sheriff_vote'
+  | 'ended';
 export type PlayerStatus = 'alive' | 'dead';
+
+export type VictoryCondition = 'village_win' | 'werewolf_win' | 'werewolf_slaughter_civilians' | 'werewolf_slaughter_gods';
 
 export interface Player {
   id: string;
@@ -15,6 +23,11 @@ export interface Player {
   isOwner: boolean;
   emoji: string;
   personality?: string;
+  // Sheriff system (12-player mode)
+  isSheriff?: boolean;
+  sheriffVoteWeight?: number;
+  isElectionCandidate?: boolean;
+  hasWithdrawn?: boolean;
 }
 
 export interface Room {
@@ -29,7 +42,7 @@ export interface Room {
 
 export interface GameLog {
   id: string;
-  type: 'phase' | 'speech' | 'system' | 'death' | 'execution' | 'vote_result' | 'game_end';
+  type: 'phase' | 'speech' | 'system' | 'death' | 'execution' | 'vote_result' | 'game_end' | 'sheriff' | 'explode';
   content: string;
   playerNumber?: number;
   playerName?: string;
@@ -142,7 +155,12 @@ export interface GameState {
   votes: Record<string, number>;
   timer: number;
   showRoleReveal: boolean;
-  gameResult: { winner: 'village' | 'werewolf'; mvp?: number } | null;
+  gameResult: { winner: 'village' | 'werewolf'; mvp?: number; victoryCondition?: VictoryCondition } | null;
+
+  // Sheriff system (12-player mode)
+  sheriffId: number | null;
+  isPoliceElectionPhase: boolean;
+  wolfExplodeAvailable: boolean;
 
   // API settings
   apiProvider: string;
@@ -151,6 +169,9 @@ export interface GameState {
 
   // Notes
   notes: string;
+
+  // Local guesses (F2: player identity guesses, not sent to server)
+  localGuesses: Record<string, Role | null>;
 
   // Agent templates
   agentTemplates: AgentTemplate[];
@@ -178,6 +199,10 @@ export interface GameState {
   removeAgentTemplate: (id: string) => void;
   selectAgent: (id: string) => void;
   setSoloMode: (solo: boolean) => void;
+  setLocalGuess: (playerId: string, role: Role | null) => void;
+  setSheriffId: (id: number | null) => void;
+  setPoliceElectionPhase: (active: boolean) => void;
+  setWolfExplodeAvailable: (available: boolean) => void;
 }
 
 // TODO: MOCK DATA — 替换为真实房间数据（从后端/数据库获取）
@@ -233,10 +258,14 @@ export const useGameStore = create<GameState>((set) => ({
   timer: 0,
   showRoleReveal: false,
   gameResult: null,
+  sheriffId: null,
+  isPoliceElectionPhase: false,
+  wolfExplodeAvailable: false,
   apiProvider: 'OPENAI',
   apiKey: '',
   apiModel: 'gpt-4o-mini',
   notes: '',
+  localGuesses: {},
   agentTemplates: PRESET_AGENTS,
   selectedAgentId: 'aggressive',
   isSoloMode: false,
@@ -257,7 +286,7 @@ export const useGameStore = create<GameState>((set) => ({
     if (!room) return {};
     return { currentRoom: room, myPlayerId: state.currentUser?.id || null };
   }),
-  leaveRoom: () => set({ currentRoom: null, myPlayerId: null, isReady: false, gamePhase: 'waiting', gameLogs: [], myRole: null }),
+  leaveRoom: () => set({ currentRoom: null, myPlayerId: null, isReady: false, gamePhase: 'waiting', gameLogs: [], myRole: null, localGuesses: {}, sheriffId: null }),
   setReady: (ready) => set({ isReady: ready }),
   setGamePhase: (phase) => set({ gamePhase: phase }),
   addGameLog: (log) => set((state) => ({
@@ -289,4 +318,10 @@ export const useGameStore = create<GameState>((set) => ({
   })),
   selectAgent: (id) => set({ selectedAgentId: id }),
   setSoloMode: (solo) => set({ isSoloMode: solo }),
+  setLocalGuess: (playerId, role) => set((state) => ({
+    localGuesses: { ...state.localGuesses, [playerId]: role },
+  })),
+  setSheriffId: (id) => set({ sheriffId: id }),
+  setPoliceElectionPhase: (active) => set({ isPoliceElectionPhase: active }),
+  setWolfExplodeAvailable: (available) => set({ wolfExplodeAvailable: available }),
 }));
