@@ -49,6 +49,7 @@ export interface AgentTemplate {
   isCustom?: boolean;
 }
 
+// TODO: MOCK DATA — 预置 Agent 模板，未来可从后端加载或允许用户云端存储
 const PRESET_AGENTS: AgentTemplate[] = [
   {
     id: 'aggressive',
