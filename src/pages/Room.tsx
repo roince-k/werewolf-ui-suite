@@ -43,6 +43,7 @@ const Room = () => {
     gameResult, setGameResult, castVote, notes, setNotes, isSoloMode,
     addPlayerToRoom, localGuesses, setLocalGuess, sheriffId, myPlayerId,
   } = useGameStore();
+  const { startGame, clearTimers } = useGameEngine();
   const [message, setMessage] = useState('');
   const [showNotes, setShowNotes] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
@@ -76,17 +77,12 @@ const Room = () => {
   const showExplodeButton = gamePhase === 'day_wolf_explode_available' || isDayPhase;
 
   const handleStartGame = () => {
-    setGamePhase('night');
-    setShowRoleReveal(true);
-    DEMO_LOGS.forEach((log, i) => {
-      setTimeout(() => addGameLog(log), i * 800);
-    });
-    setTimeout(() => setGamePhase('day'), 3000);
-    setTimeout(() => setGamePhase('voting'), 8000);
-    setTimeout(() => {
-      setGameResult({ winner: 'village', mvp: 1 });
-      setGamePhase('ended');
-    }, 12000);
+    const filledSeats = players.length;
+    if (filledSeats < totalSeats) {
+      toast.error(`需要 ${totalSeats} 名玩家才能开始游戏（当前 ${filledSeats}/${totalSeats}）`);
+      return;
+    }
+    startGame();
   };
 
   const handleSendMessage = () => {
