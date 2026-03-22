@@ -17,6 +17,7 @@ import NightActionPanel, { type NightAction } from '@/components/game/NightActio
 import InviteModal from '@/components/game/InviteModal';
 import WolfExplodeButton from '@/components/game/WolfExplodeButton';
 import SheriffElection from '@/components/game/SheriffElection';
+import { useGameEngine } from '@/hooks/useGameEngine';
 
 // TODO: MOCK DATA — 替换为真实游戏日志（从游戏引擎/后端获取）
 const DEMO_LOGS: Omit<GameLog, 'id' | 'timestamp'>[] = [
