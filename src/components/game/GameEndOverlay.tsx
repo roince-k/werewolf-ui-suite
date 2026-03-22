@@ -1,27 +1,46 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useGameStore } from '@/store/gameStore';
+import { useGameStore, type VictoryCondition } from '@/store/gameStore';
+
+const VICTORY_LABELS: Record<VictoryCondition, string> = {
+  village_win: '好人阵营胜利！狼人已被消灭。',
+  werewolf_win: '狼人阵营胜利！村庄已沦陷。',
+  werewolf_slaughter_civilians: '狼人阵营胜利！屠民成功——所有平民已死亡。',
+  werewolf_slaughter_gods: '狼人阵营胜利！屠神成功——所有神职已死亡。',
+};
 
 const GameEndOverlay = () => {
   const navigate = useNavigate();
-  const { gameResult, setGameResult, setGamePhase, leaveRoom } = useGameStore();
+  const { gameResult, setGameResult, setGamePhase, leaveRoom, currentRoom, localGuesses } = useGameStore();
 
   if (!gameResult) return null;
 
   const isVillageWin = gameResult.winner === 'village';
 
-  // TODO: MOCK DATA — 替换为真实游戏结束时的身份揭示数据
-  const mockReveal = [
-    { number: 1, name: '月光猎手', role: '预言家' },
-    { number: 2, name: 'AI·暗影', role: '狼人' },
-    { number: 3, name: 'AI·迷雾', role: '狼人' },
-    { number: 4, name: '玩家4', role: '女巫' },
-    { number: 5, name: '玩家5', role: '平民' },
-    { number: 6, name: '玩家6', role: '猎人' },
-    { number: 7, name: '玩家7', role: '狼人' },
-    { number: 8, name: '玩家8', role: '平民' },
-    { number: 9, name: '玩家9', role: '狼人' },
-  ];
+  // TODO: MOCK DATA — 替换为真实游戏结束时的身份揭示数据（从后端 gameState 获取）
+  const players = currentRoom?.players || [];
+  const revealData = players.length > 0
+    ? players.map(p => ({
+        number: p.number,
+        name: p.name,
+        role: p.role || '未知',
+        localGuess: localGuesses[p.id] || null,
+      }))
+    : [
+        { number: 1, name: '月光猎手', role: '预言家', localGuess: null },
+        { number: 2, name: 'AI·暗影', role: '狼人', localGuess: null },
+        { number: 3, name: 'AI·迷雾', role: '狼人', localGuess: null },
+        { number: 4, name: '玩家4', role: '女巫', localGuess: null },
+        { number: 5, name: '玩家5', role: '平民', localGuess: null },
+        { number: 6, name: '玩家6', role: '猎人', localGuess: null },
+        { number: 7, name: '玩家7', role: '狼人', localGuess: null },
+        { number: 8, name: '玩家8', role: '平民', localGuess: null },
+        { number: 9, name: '玩家9', role: '狼人', localGuess: null },
+      ];
+
+  const victoryText = gameResult.victoryCondition
+    ? VICTORY_LABELS[gameResult.victoryCondition]
+    : isVillageWin ? '好人阵营胜利！狼人已被消灭。' : '狼人阵营胜利！村庄已沦陷。';
 
   const handlePlayAgain = () => {
     setGameResult(null);
@@ -33,6 +52,8 @@ const GameEndOverlay = () => {
     leaveRoom();
     navigate('/lobby');
   };
+
+  const isWolfRole = (role: string) => role === '狼人' || role === '白狼王' || role === 'werewolf' || role === 'white_wolf_king';
 
   return (
     <motion.div
@@ -56,25 +77,31 @@ const GameEndOverlay = () => {
         >
           {isVillageWin ? 'VILLAGE WINS!' : 'WOLVES WIN!'}
         </motion.h1>
-        <p className="text-muted-foreground mb-8">
-          {isVillageWin ? '好人阵营胜利！狼人已被消灭。' : '狼人阵营胜利！村庄已沦陷。'}
-        </p>
+        <p className="text-muted-foreground mb-8">{victoryText}</p>
 
-        {/* Identity Reveal */}
+        {/* Identity Reveal with guess comparison (F2) */}
         <div className="surface-elevated rounded-xl p-4 mb-6 text-left">
           <h3 className="text-sm font-medium text-accent mb-3 text-center">身份揭示</h3>
           <div className="grid grid-cols-3 gap-2">
-            {mockReveal.map(p => (
-              <div key={p.number} className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-background/50">
-                <span className="text-xs tabular-nums text-muted-foreground">{p.number}号</span>
-                <span className="text-sm text-foreground truncate flex-1">{p.name}</span>
-                <span className={`text-xs px-1.5 py-0.5 rounded ${
-                  p.role === '狼人' ? 'bg-destructive/10 text-destructive' : 'bg-alive/10 text-alive'
+            {revealData.map(p => {
+              const guessCorrect = p.localGuess && p.localGuess === p.role;
+              const guessWrong = p.localGuess && p.localGuess !== p.role;
+              return (
+                <div key={p.number} className={`flex items-center gap-2 px-2 py-1.5 rounded-md bg-background/50 ${
+                  guessCorrect ? 'ring-1 ring-alive/40' : guessWrong ? 'ring-1 ring-destructive/40' : ''
                 }`}>
-                  {p.role}
-                </span>
-              </div>
-            ))}
+                  <span className="text-xs tabular-nums text-muted-foreground">{p.number}号</span>
+                  <span className="text-sm text-foreground truncate flex-1">{p.name}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded ${
+                    isWolfRole(p.role) ? 'bg-destructive/10 text-destructive' : 'bg-alive/10 text-alive'
+                  }`}>
+                    {p.role}
+                  </span>
+                  {guessCorrect && <span className="text-[9px] text-alive">✓</span>}
+                  {guessWrong && <span className="text-[9px] text-destructive">✗</span>}
+                </div>
+              );
+            })}
           </div>
         </div>
 

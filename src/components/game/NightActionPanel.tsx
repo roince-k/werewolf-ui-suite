@@ -1,24 +1,32 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Heart, Skull, Crosshair, Moon, Check, X, Droplets, FlaskConical } from 'lucide-react';
-import type { Player, Role } from '@/store/gameStore';
+import { motion } from 'framer-motion';
+import { Eye, Heart, Skull, Crosshair, Moon, Check, X, Droplets, FlaskConical, Shield, Ghost, Clock } from 'lucide-react';
+import type { Player, Role, GamePhase } from '@/store/gameStore';
 
 interface NightActionPanelProps {
   myRole: Role | null;
+  currentPhase: GamePhase;
   players: Player[];
   onAction: (action: NightAction) => void;
   onSkip: () => void;
 }
 
 export interface NightAction {
-  type: 'werewolf_kill' | 'seer_check' | 'witch_save' | 'witch_poison' | 'hunter_shoot';
+  type: 'werewolf_kill' | 'seer_check' | 'witch_save' | 'witch_poison' | 'hunter_shoot' | 'guard_protect';
   targetId?: string;
 }
 
 const ROLE_ACTIONS: Record<string, { title: string; icon: React.ReactNode; description: string; actionLabel: string; color: string }> = {
   werewolf: {
     title: '狼人行动',
-    icon: <Skull className="w-5 h-5" />,
+    icon: <Ghost className="w-5 h-5" />,
+    description: '选择今晚要袭击的目标',
+    actionLabel: '确认击杀',
+    color: 'destructive',
+  },
+  white_wolf_king: {
+    title: '白狼王行动',
+    icon: <Ghost className="w-5 h-5" />,
     description: '选择今晚要袭击的目标',
     actionLabel: '确认击杀',
     color: 'destructive',
@@ -44,33 +52,90 @@ const ROLE_ACTIONS: Record<string, { title: string; icon: React.ReactNode; descr
     actionLabel: '待命中',
     color: 'gold',
   },
+  guard: {
+    title: '守卫守护',
+    icon: <Shield className="w-5 h-5" />,
+    description: '选择今晚要守护的玩家',
+    actionLabel: '确认守护',
+    color: 'blue-400',
+  },
 };
 
-const NightActionPanel = ({ myRole, players, onAction, onSkip }: NightActionPanelProps) => {
+// F3: Map phase+role to whether player has an action
+function shouldShowAction(phase: GamePhase, role: Role | null): boolean {
+  if (!role) return false;
+  switch (phase) {
+    case 'night_werewolf':
+      return role === 'werewolf' || role === 'white_wolf_king';
+    case 'night_seer':
+      return role === 'seer';
+    case 'night_witch':
+      return role === 'witch';
+    case 'night_guard':
+      return role === 'guard';
+    case 'night':
+      // Legacy generic night phase — show action for any actionable role
+      return ['werewolf', 'white_wolf_king', 'seer', 'witch', 'guard'].includes(role);
+    default:
+      return false;
+  }
+}
+
+const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip }: NightActionPanelProps) => {
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [witchAction, setWitchAction] = useState<'save' | 'poison' | null>(null);
 
-  if (!myRole || myRole === 'villager') return null;
+  // F3: Determine if this role has action in this phase
+  if (!myRole || !shouldShowAction(currentPhase, myRole)) {
+    // Show waiting UI for non-active roles during night
+    if (currentPhase.startsWith('night')) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 30, scale: 0.95 }}
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]"
+        >
+          <div className="glass-panel rounded-2xl overflow-hidden border border-border/60">
+            <div className="flex items-center gap-3 px-5 py-5 justify-center">
+              <Clock className="w-5 h-5 text-muted-foreground animate-pulse" />
+              <div className="text-center">
+                <p className="text-sm font-medium text-muted-foreground">夜晚进行中</p>
+                <p className="text-[11px] text-muted-foreground/60 mt-0.5">请等待其他角色完成行动...</p>
+              </div>
+              <Moon className="w-4 h-4 text-accent/40" />
+            </div>
+          </div>
+        </motion.div>
+      );
+    }
+    return null;
+  }
 
-  const config = ROLE_ACTIONS[myRole];
+  if (myRole === 'villager') return null;
+
+  const roleKey = myRole === 'white_wolf_king' ? 'white_wolf_king' : myRole;
+  const config = ROLE_ACTIONS[roleKey];
   if (!config) return null;
 
   const alivePlayers = players.filter(p => p.status === 'alive');
 
   const handleConfirm = () => {
-    if (myRole === 'werewolf' && selectedTarget) {
+    if ((myRole === 'werewolf' || myRole === 'white_wolf_king') && selectedTarget) {
       onAction({ type: 'werewolf_kill', targetId: selectedTarget });
     } else if (myRole === 'seer' && selectedTarget) {
       onAction({ type: 'seer_check', targetId: selectedTarget });
     } else if (myRole === 'witch') {
       if (witchAction === 'save') onAction({ type: 'witch_save' });
       else if (witchAction === 'poison' && selectedTarget) onAction({ type: 'witch_poison', targetId: selectedTarget });
+    } else if (myRole === 'guard' && selectedTarget) {
+      onAction({ type: 'guard_protect', targetId: selectedTarget });
     }
     setSelectedTarget(null);
     setWitchAction(null);
   };
 
-  const needsTarget = myRole === 'werewolf' || myRole === 'seer' || (myRole === 'witch' && witchAction === 'poison');
+  const needsTarget = myRole === 'werewolf' || myRole === 'white_wolf_king' || myRole === 'seer' || myRole === 'guard' || (myRole === 'witch' && witchAction === 'poison');
   const canConfirm = myRole === 'hunter' ? false :
     myRole === 'witch' ? (witchAction === 'save' || (witchAction === 'poison' && selectedTarget)) :
     !!selectedTarget;
