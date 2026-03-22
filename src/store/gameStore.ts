@@ -179,6 +179,7 @@ export interface GameState {
   setSoloMode: (solo: boolean) => void;
 }
 
+// TODO: MOCK DATA — 替换为真实房间数据（从后端/数据库获取）
 const MOCK_ROOMS: Room[] = [
   {
     id: '1', name: '新手房间', mode: '9人标准局', maxPlayers: 9,
@@ -218,7 +219,7 @@ export const useGameStore = create<GameState>((set) => ({
   currentUser: null,
   isLoggedIn: false,
   rooms: MOCK_ROOMS,
-  lobbyUsers: ['月光猎手', '暗夜行者', '银色子弹', '沉默观察', '迷雾森林'],
+  lobbyUsers: ['月光猎手', '暗夜行者', '银色子弹', '沉默观察', '迷雾森林'], // TODO: MOCK DATA — 替换为真实在线用户列表
   roomFilter: 'all',
   currentRoom: null,
   myPlayerId: null,
