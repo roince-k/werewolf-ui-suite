@@ -16,7 +16,7 @@ import PhaseBanner from '@/components/game/PhaseBanner';
 import NightActionPanel, { type NightAction } from '@/components/game/NightActionPanel';
 import InviteModal from '@/components/game/InviteModal';
 
-// Demo game logs
+// TODO: MOCK DATA — 替换为真实游戏日志（从游戏引擎/后端获取）
 const DEMO_LOGS: Omit<GameLog, 'id' | 'timestamp'>[] = [
   { type: 'phase', content: '—— 第1夜 ——' },
   { type: 'system', content: '天黑请闭眼，狼人请睁眼...' },

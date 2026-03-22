@@ -10,6 +10,7 @@ const GameEndOverlay = () => {
 
   const isVillageWin = gameResult.winner === 'village';
 
+  // TODO: MOCK DATA — 替换为真实游戏结束时的身份揭示数据
   const mockReveal = [
     { number: 1, name: '月光猎手', role: '预言家' },
     { number: 2, name: 'AI·暗影', role: '狼人' },
