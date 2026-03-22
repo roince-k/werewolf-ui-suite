@@ -72,18 +72,24 @@ const CreateRoomModal = ({ onClose }: { onClose: () => void }) => {
           <div>
             <label className="block text-sm text-muted-foreground mb-1.5">板子类型</label>
             <div className="flex gap-2">
-              {[{ k: '9', l: '9人标准局' }, { k: '12', l: '12人标准局' }].map(m => (
+              {[{ k: '9', l: '9人标准局', sub: '预女猎民板' }, { k: '12', l: '12人标准局', sub: '上警·预女猎守板' }].map(m => (
                 <button
                   key={m.k}
                   onClick={() => setMode(m.k)}
-                  className={`flex-1 py-2 rounded-lg text-sm transition-all ${
+                  className={`flex-1 py-2 rounded-lg text-sm transition-all flex flex-col items-center gap-0.5 ${
                     mode === m.k ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {m.l}
+                  <span>{m.l}</span>
+                  <span className={`text-[10px] ${mode === m.k ? 'text-primary-foreground/70' : 'text-muted-foreground/50'}`}>{m.sub}</span>
                 </button>
               ))}
             </div>
+            {mode === '12' && (
+              <p className="text-[11px] text-accent/70 mt-1.5">
+                ⭐ 12人局包含白狼王、守卫和警长竞选系统
+              </p>
+            )}
           </div>
           <button onClick={handleCreate} className="btn-ritual w-full text-sm">创建房间</button>
         </div>
