@@ -185,6 +185,7 @@ export interface GameState {
   logout: () => void;
   setRoomFilter: (filter: 'all' | 'waiting' | 'playing' | 'mine') => void;
   joinRoom: (roomId: string) => void;
+  createRoom: (name: string, maxPlayers: number) => void;
   leaveRoom: () => void;
   setReady: (ready: boolean) => void;
   setGamePhase: (phase: GamePhase) => void;
