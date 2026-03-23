@@ -4,17 +4,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Send, UserPlus, BookOpen, MoreHorizontal,
-  StickyNote, Clock, Shield, Skull, Swords, Moon, Sun
+  Clock, Shield, Skull, Swords, Moon, Sun
 } from 'lucide-react';
 
 import { useGameStore, type GamePhase, type GameLog, type Role, type AgentTemplate } from '@/store/gameStore';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
-import NoteDrawer from '@/components/game/NoteDrawer';
 import ActionDrawer from '@/components/game/ActionDrawer';
 import PlayerSeat from '@/components/game/PlayerSeat';
 import GameBulletin from '@/components/game/GameBulletin';
 import PhaseBanner from '@/components/game/PhaseBanner';
-import NightActionPanel, { type NightAction } from '@/components/game/NightActionPanel';
+import { type NightAction } from '@/components/game/NightActionPanel';
 import InviteModal from '@/components/game/InviteModal';
 import WolfExplodeButton from '@/components/game/WolfExplodeButton';
 import SheriffElection from '@/components/game/SheriffElection';
