@@ -91,6 +91,19 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, inl
   if (!myRole || !shouldShowAction(currentPhase, myRole)) {
     // Show waiting UI for non-active roles during night
     if (currentPhase.startsWith('night')) {
+      const waitingContent = (
+        <div className={inline ? '' : 'glass-panel rounded-2xl overflow-hidden border border-border/60'}>
+          <div className="flex items-center gap-3 px-5 py-5 justify-center">
+            <Clock className="w-5 h-5 text-muted-foreground animate-pulse" />
+            <div className="text-center">
+              <p className="text-sm font-medium text-muted-foreground">夜晚进行中</p>
+              <p className="text-[11px] text-muted-foreground/60 mt-0.5">请等待其他角色完成行动...</p>
+            </div>
+            <Moon className="w-4 h-4 text-accent/40" />
+          </div>
+        </div>
+      );
+      if (inline) return waitingContent;
       return (
         <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -98,16 +111,7 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, inl
           exit={{ opacity: 0, y: 30, scale: 0.95 }}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]"
         >
-          <div className="glass-panel rounded-2xl overflow-hidden border border-border/60">
-            <div className="flex items-center gap-3 px-5 py-5 justify-center">
-              <Clock className="w-5 h-5 text-muted-foreground animate-pulse" />
-              <div className="text-center">
-                <p className="text-sm font-medium text-muted-foreground">夜晚进行中</p>
-                <p className="text-[11px] text-muted-foreground/60 mt-0.5">请等待其他角色完成行动...</p>
-              </div>
-              <Moon className="w-4 h-4 text-accent/40" />
-            </div>
-          </div>
+          {waitingContent}
         </motion.div>
       );
     }
