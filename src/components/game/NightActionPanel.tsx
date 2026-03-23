@@ -230,6 +230,19 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, inl
           </button>
         </div>
       </div>
+    </div>
+  );
+
+  if (inline) return panelContent;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 30, scale: 0.95 }}
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]"
+    >
+      {panelContent}
     </motion.div>
   );
 };
