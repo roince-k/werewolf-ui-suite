@@ -9,8 +9,6 @@ interface NightActionPanelProps {
   players: Player[];
   onAction: (action: NightAction) => void;
   onSkip: () => void;
-  /** When true, renders inline (no fixed positioning) for use inside a drawer */
-  inline?: boolean;
 }
 
 export interface NightAction {
@@ -83,7 +81,7 @@ function shouldShowAction(phase: GamePhase, role: Role | null): boolean {
   }
 }
 
-const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, inline = false }: NightActionPanelProps) => {
+const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip }: NightActionPanelProps) => {
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [witchAction, setWitchAction] = useState<'save' | 'poison' | null>(null);
 
@@ -91,19 +89,6 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, inl
   if (!myRole || !shouldShowAction(currentPhase, myRole)) {
     // Show waiting UI for non-active roles during night
     if (currentPhase.startsWith('night')) {
-      const waitingContent = (
-        <div className={inline ? '' : 'glass-panel rounded-2xl overflow-hidden border border-border/60'}>
-          <div className="flex items-center gap-3 px-5 py-5 justify-center">
-            <Clock className="w-5 h-5 text-muted-foreground animate-pulse" />
-            <div className="text-center">
-              <p className="text-sm font-medium text-muted-foreground">夜晚进行中</p>
-              <p className="text-[11px] text-muted-foreground/60 mt-0.5">请等待其他角色完成行动...</p>
-            </div>
-            <Moon className="w-4 h-4 text-accent/40" />
-          </div>
-        </div>
-      );
-      if (inline) return waitingContent;
       return (
         <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -111,7 +96,16 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, inl
           exit={{ opacity: 0, y: 30, scale: 0.95 }}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]"
         >
-          {waitingContent}
+          <div className="glass-panel rounded-2xl overflow-hidden border border-border/60">
+            <div className="flex items-center gap-3 px-5 py-5 justify-center">
+              <Clock className="w-5 h-5 text-muted-foreground animate-pulse" />
+              <div className="text-center">
+                <p className="text-sm font-medium text-muted-foreground">夜晚进行中</p>
+                <p className="text-[11px] text-muted-foreground/60 mt-0.5">请等待其他角色完成行动...</p>
+              </div>
+              <Moon className="w-4 h-4 text-accent/40" />
+            </div>
+          </div>
         </motion.div>
       );
     }
@@ -146,8 +140,14 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, inl
     myRole === 'witch' ? (witchAction === 'save' || (witchAction === 'poison' && selectedTarget)) :
     !!selectedTarget;
 
-  const panelContent = (
-    <div className={inline ? 'overflow-hidden' : 'glass-panel rounded-2xl overflow-hidden border border-border/60'}>
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 30, scale: 0.95 }}
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]"
+    >
+      <div className="glass-panel rounded-2xl overflow-hidden border border-border/60">
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border/40 bg-background/30">
           <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-${config.color}/15 text-${config.color}`}>
@@ -229,19 +229,7 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, inl
             {config.actionLabel}
           </button>
         </div>
-    </div>
-  );
-
-  if (inline) return panelContent;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 30, scale: 0.95 }}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]"
-    >
-      {panelContent}
+      </div>
     </motion.div>
   );
 };

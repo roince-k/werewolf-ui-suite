@@ -4,16 +4,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Send, UserPlus, BookOpen, MoreHorizontal,
-  Clock, Shield, Skull, Swords, Moon, Sun
+  StickyNote, Clock, Shield, Skull, Swords, Moon, Sun
 } from 'lucide-react';
 
 import { useGameStore, type GamePhase, type GameLog, type Role, type AgentTemplate } from '@/store/gameStore';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
-import ActionDrawer from '@/components/game/ActionDrawer';
+import NoteDrawer from '@/components/game/NoteDrawer';
 import PlayerSeat from '@/components/game/PlayerSeat';
 import GameBulletin from '@/components/game/GameBulletin';
 import PhaseBanner from '@/components/game/PhaseBanner';
-import { type NightAction } from '@/components/game/NightActionPanel';
+import NightActionPanel, { type NightAction } from '@/components/game/NightActionPanel';
 import InviteModal from '@/components/game/InviteModal';
 import WolfExplodeButton from '@/components/game/WolfExplodeButton';
 import SheriffElection from '@/components/game/SheriffElection';
@@ -45,6 +45,7 @@ const Room = () => {
   } = useGameStore();
   const { startGame, clearTimers } = useGameEngine();
   const [message, setMessage] = useState('');
+  const [showNotes, setShowNotes] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteSeatNumber, setInviteSeatNumber] = useState<number | null>(null);
   const [showRules, setShowRules] = useState(false);
@@ -280,6 +281,9 @@ const Room = () => {
         )}
 
         <div className="flex-1" />
+        <button onClick={() => setShowNotes(!showNotes)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
+          <StickyNote className="w-3.5 h-3.5" /> 笔记
+        </button>
         <button onClick={() => setInviteSeatNumber(-1)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
           <UserPlus className="w-3.5 h-3.5" /> 邀请
         </button>
@@ -372,14 +376,19 @@ const Room = () => {
 
         {/* Right: Bulletin + Notes */}
         <aside className="w-[300px] border-l border-border flex flex-col shrink-0 bg-card/50">
-          <GameBulletin logs={gameLogs} className="flex-1 min-h-0" />
-          <ActionDrawer
-            myRole={myRole}
-            currentPhase={gamePhase}
-            players={players}
-            onAction={handleNightAction}
-            onSkip={handleSkipNight}
-          />
+          <GameBulletin logs={gameLogs} className="flex-[2] min-h-0" />
+          <div className="flex-1 border-t border-border/40 flex flex-col bg-surface/30">
+            <div className="px-4 py-2.5 flex items-center gap-2 border-b border-border/30">
+              <StickyNote className="w-3.5 h-3.5 text-gold" />
+              <span className="display-title text-xs text-gold tracking-wider">推理笔记</span>
+            </div>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="记录你的推理和怀疑对象..."
+              className="flex-1 input-ritual text-sm resize-none border-0 rounded-none bg-transparent focus:ring-0 px-4 py-3"
+            />
+          </div>
         </aside>
       </div>
 
@@ -413,6 +422,18 @@ const Room = () => {
         )}
       </AnimatePresence>
 
+      {/* Night Action Panel — F3: driven by currentPhase + myRole */}
+      <AnimatePresence>
+        {isNightPhase && (
+          <NightActionPanel
+            myRole={myRole}
+            currentPhase={gamePhase}
+            players={players}
+            onAction={handleNightAction}
+            onSkip={handleSkipNight}
+          />
+        )}
+      </AnimatePresence>
 
       {/* F5: Sheriff Election (12-player mode) */}
       <AnimatePresence>
@@ -439,6 +460,11 @@ const Room = () => {
 
       {/* Game End */}
       {gameResult && <GameEndOverlay />}
+
+      {/* Notes Drawer */}
+      <AnimatePresence>
+        {showNotes && <NoteDrawer onClose={() => setShowNotes(false)} />}
+      </AnimatePresence>
 
       {/* Rules Dropdown */}
       <AnimatePresence>
