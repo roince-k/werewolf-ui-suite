@@ -229,7 +229,6 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, inl
             {config.actionLabel}
           </button>
         </div>
-      </div>
     </div>
   );
 
