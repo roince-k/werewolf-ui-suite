@@ -146,14 +146,8 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, inl
     myRole === 'witch' ? (witchAction === 'save' || (witchAction === 'poison' && selectedTarget)) :
     !!selectedTarget;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 30, scale: 0.95 }}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]"
-    >
-      <div className="glass-panel rounded-2xl overflow-hidden border border-border/60">
+  const panelContent = (
+    <div className={inline ? 'overflow-hidden' : 'glass-panel rounded-2xl overflow-hidden border border-border/60'}>
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border/40 bg-background/30">
           <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-${config.color}/15 text-${config.color}`}>
