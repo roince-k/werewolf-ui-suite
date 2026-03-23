@@ -418,18 +418,14 @@ const Room = () => {
         )}
       </AnimatePresence>
 
-      {/* Night Action Panel — F3: driven by currentPhase + myRole */}
-      <AnimatePresence>
-        {isNightPhase && (
-          <NightActionPanel
-            myRole={myRole}
-            currentPhase={gamePhase}
-            players={players}
-            onAction={handleNightAction}
-            onSkip={handleSkipNight}
-          />
-        )}
-      </AnimatePresence>
+      {/* Action Drawer — right-side slide-out panel */}
+      <ActionDrawer
+        myRole={myRole}
+        currentPhase={gamePhase}
+        players={players}
+        onAction={handleNightAction}
+        onSkip={handleSkipNight}
+      />
 
       {/* F5: Sheriff Election (12-player mode) */}
       <AnimatePresence>
