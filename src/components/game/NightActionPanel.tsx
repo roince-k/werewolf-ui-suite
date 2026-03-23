@@ -9,6 +9,8 @@ interface NightActionPanelProps {
   players: Player[];
   onAction: (action: NightAction) => void;
   onSkip: () => void;
+  /** When true, renders inline (no fixed positioning) for use inside a drawer */
+  inline?: boolean;
 }
 
 export interface NightAction {
