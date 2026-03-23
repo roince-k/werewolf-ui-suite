@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Send, UserPlus, BookOpen, MoreHorizontal,
-  StickyNote, Clock, Shield, Skull, Swords, Moon, Sun
+  Clock, Shield, Skull, Swords, Moon, Sun, StickyNote
 } from 'lucide-react';
 
 import { useGameStore, type GamePhase, type GameLog, type Role, type AgentTemplate } from '@/store/gameStore';
