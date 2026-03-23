@@ -10,6 +10,7 @@ import {
 import { useGameStore, type GamePhase, type GameLog, type Role, type AgentTemplate } from '@/store/gameStore';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
 import NoteDrawer from '@/components/game/NoteDrawer';
+import ActionDrawer from '@/components/game/ActionDrawer';
 import PlayerSeat from '@/components/game/PlayerSeat';
 import GameBulletin from '@/components/game/GameBulletin';
 import PhaseBanner from '@/components/game/PhaseBanner';
