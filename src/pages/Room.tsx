@@ -453,11 +453,6 @@ const Room = () => {
       {/* Game End */}
       {gameResult && <GameEndOverlay />}
 
-      {/* Notes Drawer */}
-      <AnimatePresence>
-        {showNotes && <NoteDrawer onClose={() => setShowNotes(false)} />}
-      </AnimatePresence>
-
       {/* Rules Dropdown */}
       <AnimatePresence>
         {showRules && (
