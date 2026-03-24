@@ -9,14 +9,13 @@ import {
 
 import { useGameStore, type GamePhase, type GameLog, type Role, type AgentTemplate } from '@/store/gameStore';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
-import NoteDrawer from '@/components/game/NoteDrawer';
 import PlayerSeat from '@/components/game/PlayerSeat';
 import GameBulletin from '@/components/game/GameBulletin';
 import PhaseBanner from '@/components/game/PhaseBanner';
-import NightActionPanel, { type NightAction } from '@/components/game/NightActionPanel';
+import type { NightAction } from '@/components/game/NightActionPanel';
 import InviteModal from '@/components/game/InviteModal';
 import WolfExplodeButton from '@/components/game/WolfExplodeButton';
-import SheriffElection from '@/components/game/SheriffElection';
+import ActionDrawer from '@/components/game/ActionDrawer';
 import { useGameEngine } from '@/hooks/useGameEngine';
 
 // TODO: MOCK DATA — 替换为真实游戏日志（从游戏引擎/后端获取）
@@ -45,7 +44,6 @@ const Room = () => {
   } = useGameStore();
   const { startGame, clearTimers } = useGameEngine();
   const [message, setMessage] = useState('');
-  const [showNotes, setShowNotes] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteSeatNumber, setInviteSeatNumber] = useState<number | null>(null);
   const [showRules, setShowRules] = useState(false);
@@ -281,9 +279,6 @@ const Room = () => {
         )}
 
         <div className="flex-1" />
-        <button onClick={() => setShowNotes(!showNotes)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
-          <StickyNote className="w-3.5 h-3.5" /> 笔记
-        </button>
         <button onClick={() => setInviteSeatNumber(-1)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
           <UserPlus className="w-3.5 h-3.5" /> 邀请
         </button>
@@ -422,49 +417,28 @@ const Room = () => {
         )}
       </AnimatePresence>
 
-      {/* Night Action Panel — F3: driven by currentPhase + myRole */}
-      <AnimatePresence>
-        {isNightPhase && (
-          <NightActionPanel
-            myRole={myRole}
-            currentPhase={gamePhase}
-            players={players}
-            onAction={handleNightAction}
-            onSkip={handleSkipNight}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* F5: Sheriff Election (12-player mode) */}
-      <AnimatePresence>
-        {(gamePhase === 'sheriff_election' || gamePhase === 'sheriff_speech' || gamePhase === 'sheriff_vote' || sheriffPhase === 'transfer') && (
-          <SheriffElection
-            phase={
-              sheriffPhase === 'transfer' ? 'transfer' :
-              gamePhase === 'sheriff_election' ? 'nominate' :
-              gamePhase === 'sheriff_speech' ? 'speech' : 'vote'
-            }
-            players={players}
-            candidates={candidates}
-            withdrawnCandidates={withdrawnCandidates}
-            isSelfCandidate={candidates.includes(players.find(p => p.id === myPlayerId)?.number ?? -1)}
-            isSelfSheriff={sheriffPhase === 'transfer'}
-            onNominate={handleSheriffNominate}
-            onWithdraw={handleSheriffWithdraw}
-            onVote={handleSheriffVote}
-            onTransfer={handleSheriffTransfer}
-            onDestroy={handleSheriffDestroy}
-          />
-        )}
-      </AnimatePresence>
+      {/* Left Action Drawer */}
+      <ActionDrawer
+        gamePhase={gamePhase}
+        myRole={myRole}
+        players={players}
+        onNightAction={handleNightAction}
+        onSkipNight={handleSkipNight}
+        sheriffPhase={sheriffPhase}
+        candidates={candidates}
+        withdrawnCandidates={withdrawnCandidates}
+        isSelfCandidate={candidates.includes(players.find(p => p.id === myPlayerId)?.number ?? -1)}
+        isSelfSheriff={sheriffPhase === 'transfer'}
+        onSheriffNominate={handleSheriffNominate}
+        onSheriffWithdraw={handleSheriffWithdraw}
+        onSheriffVote={handleSheriffVote}
+        onSheriffTransfer={handleSheriffTransfer}
+        onSheriffDestroy={handleSheriffDestroy}
+        onWolfExplode={handleWolfExplode}
+      />
 
       {/* Game End */}
       {gameResult && <GameEndOverlay />}
-
-      {/* Notes Drawer */}
-      <AnimatePresence>
-        {showNotes && <NoteDrawer onClose={() => setShowNotes(false)} />}
-      </AnimatePresence>
 
       {/* Rules Dropdown */}
       <AnimatePresence>

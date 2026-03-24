@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Hand, X, Check, Vote, Crown, Trash2 } from 'lucide-react';
 import type { Player } from '@/store/gameStore';
 
-interface SheriffElectionProps {
+export interface SheriffElectionProps {
   phase: 'nominate' | 'speech' | 'vote' | 'transfer';
   players: Player[];
   candidates: number[]; // player numbers who nominated
@@ -16,11 +16,12 @@ interface SheriffElectionProps {
   onVote: (targetNumber: number) => void;
   onTransfer: (targetNumber: number) => void;
   onDestroy: () => void;
+  embedded?: boolean;
 }
 
 const SheriffElection = ({
   phase, players, candidates, withdrawnCandidates, currentSpeaker,
-  isSelfCandidate, isSelfSheriff, onNominate, onWithdraw, onVote, onTransfer, onDestroy,
+  isSelfCandidate, isSelfSheriff, onNominate, onWithdraw, onVote, onTransfer, onDestroy, embedded,
 }: SheriffElectionProps) => {
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
 
@@ -31,12 +32,12 @@ const SheriffElection = ({
   if (phase === 'transfer' && isSelfSheriff) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 30 }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[480px]"
+        exit={{ opacity: 0, y: 10 }}
+        className={embedded ? 'w-full' : 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[480px]'}
       >
-        <div className="glass-panel rounded-2xl overflow-hidden border border-gold/30">
+        <div className={embedded ? '' : 'glass-panel rounded-2xl overflow-hidden border border-gold/30'}>
           <div className="flex items-center gap-3 px-5 py-4 border-b border-border/40 bg-gold/5">
             <Star className="w-5 h-5 text-gold fill-gold" />
             <div>
@@ -89,12 +90,12 @@ const SheriffElection = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 30, scale: 0.95 }}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
+      className={embedded ? 'w-full' : 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]'}
     >
-      <div className="glass-panel rounded-2xl overflow-hidden border border-gold/30">
+      <div className={embedded ? '' : 'glass-panel rounded-2xl overflow-hidden border border-gold/30'}>
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border/40 bg-gold/5">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gold/15">

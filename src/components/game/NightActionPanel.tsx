@@ -9,6 +9,7 @@ interface NightActionPanelProps {
   players: Player[];
   onAction: (action: NightAction) => void;
   onSkip: () => void;
+  embedded?: boolean;
 }
 
 export interface NightAction {
@@ -81,7 +82,7 @@ function shouldShowAction(phase: GamePhase, role: Role | null): boolean {
   }
 }
 
-const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip }: NightActionPanelProps) => {
+const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, embedded }: NightActionPanelProps) => {
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [witchAction, setWitchAction] = useState<'save' | 'poison' | null>(null);
 
@@ -91,12 +92,12 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip }: N
     if (currentPhase.startsWith('night')) {
       return (
         <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 30, scale: 0.95 }}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          className={embedded ? 'w-full' : 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]'}
         >
-          <div className="glass-panel rounded-2xl overflow-hidden border border-border/60">
+          <div className={embedded ? '' : 'glass-panel rounded-2xl overflow-hidden border border-border/60'}>
             <div className="flex items-center gap-3 px-5 py-5 justify-center">
               <Clock className="w-5 h-5 text-muted-foreground animate-pulse" />
               <div className="text-center">
@@ -142,12 +143,12 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip }: N
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 30, scale: 0.95 }}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
+      className={embedded ? 'w-full' : 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]'}
     >
-      <div className="glass-panel rounded-2xl overflow-hidden border border-border/60">
+      <div className={embedded ? '' : 'glass-panel rounded-2xl overflow-hidden border border-border/60'}>
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border/40 bg-background/30">
           <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-${config.color}/15 text-${config.color}`}>
