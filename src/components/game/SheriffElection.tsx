@@ -37,7 +37,7 @@ const SheriffElection = ({
         exit={{ opacity: 0, y: 10 }}
         className={embedded ? 'w-full' : 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[480px]'}
       >
-        <div className="glass-panel rounded-2xl overflow-hidden border border-gold/30">
+        <div className={embedded ? '' : 'glass-panel rounded-2xl overflow-hidden border border-gold/30'}>
           <div className="flex items-center gap-3 px-5 py-4 border-b border-border/40 bg-gold/5">
             <Star className="w-5 h-5 text-gold fill-gold" />
             <div>
