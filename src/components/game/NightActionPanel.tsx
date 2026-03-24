@@ -143,10 +143,10 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, emb
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 30, scale: 0.95 }}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
+      className={embedded ? 'w-full' : 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]'}
     >
       <div className="glass-panel rounded-2xl overflow-hidden border border-border/60">
         {/* Header */}
