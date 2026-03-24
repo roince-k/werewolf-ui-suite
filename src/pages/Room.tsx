@@ -418,49 +418,25 @@ const Room = () => {
         )}
       </AnimatePresence>
 
-      {/* Night Action Panel — F3: driven by currentPhase + myRole */}
-      <AnimatePresence>
-        {isNightPhase && (
-          <NightActionPanel
-            myRole={myRole}
-            currentPhase={gamePhase}
-            players={players}
-            onAction={handleNightAction}
-            onSkip={handleSkipNight}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* F5: Sheriff Election (12-player mode) */}
-      <AnimatePresence>
-        {(gamePhase === 'sheriff_election' || gamePhase === 'sheriff_speech' || gamePhase === 'sheriff_vote' || sheriffPhase === 'transfer') && (
-          <SheriffElection
-            phase={
-              sheriffPhase === 'transfer' ? 'transfer' :
-              gamePhase === 'sheriff_election' ? 'nominate' :
-              gamePhase === 'sheriff_speech' ? 'speech' : 'vote'
-            }
-            players={players}
-            candidates={candidates}
-            withdrawnCandidates={withdrawnCandidates}
-            isSelfCandidate={candidates.includes(players.find(p => p.id === myPlayerId)?.number ?? -1)}
-            isSelfSheriff={sheriffPhase === 'transfer'}
-            onNominate={handleSheriffNominate}
-            onWithdraw={handleSheriffWithdraw}
-            onVote={handleSheriffVote}
-            onTransfer={handleSheriffTransfer}
-            onDestroy={handleSheriffDestroy}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Game End */}
-      {gameResult && <GameEndOverlay />}
-
-      {/* Notes Drawer */}
-      <AnimatePresence>
-        {showNotes && <NoteDrawer onClose={() => setShowNotes(false)} />}
-      </AnimatePresence>
+      {/* Left Action Drawer */}
+      <ActionDrawer
+        gamePhase={gamePhase}
+        myRole={myRole}
+        players={players}
+        onNightAction={handleNightAction}
+        onSkipNight={handleSkipNight}
+        sheriffPhase={sheriffPhase}
+        candidates={candidates}
+        withdrawnCandidates={withdrawnCandidates}
+        isSelfCandidate={candidates.includes(players.find(p => p.id === myPlayerId)?.number ?? -1)}
+        isSelfSheriff={sheriffPhase === 'transfer'}
+        onSheriffNominate={handleSheriffNominate}
+        onSheriffWithdraw={handleSheriffWithdraw}
+        onSheriffVote={handleSheriffVote}
+        onSheriffTransfer={handleSheriffTransfer}
+        onSheriffDestroy={handleSheriffDestroy}
+        onWolfExplode={handleWolfExplode}
+      />
 
       {/* Rules Dropdown */}
       <AnimatePresence>
