@@ -40,6 +40,7 @@ const PlayerSeat = ({
   pickerDirection = 'up', onVote, onInspect, onSetLocalGuess,
 }: PlayerSeatProps) => {
   const [showGuessPicker, setShowGuessPicker] = useState(false);
+  const [showRoleFlip, setShowRoleFlip] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
   const isDead = player.status === 'dead';
   const isVoting = gamePhase === 'voting';
