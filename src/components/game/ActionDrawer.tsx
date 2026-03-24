@@ -210,6 +210,30 @@ const ActionDrawer = ({
                     : '📋 操作面板'}
                 </p>
               </div>
+
+              {/* Self role display */}
+              {myRole && (
+                <div className="px-4 py-3 border-b border-border/30 bg-background/20 shrink-0">
+                  <div className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border ${ROLE_DISPLAY[myRole].bg}`}>
+                    <span className="text-xl">{ROLE_DISPLAY[myRole].emoji}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs font-bold ${ROLE_DISPLAY[myRole].color}`}>
+                        你的身份：{ROLE_DISPLAY[myRole].label}
+                      </p>
+                      {WOLF_ROLES.includes(myRole) && (() => {
+                        const teammates = players.filter(
+                          p => p.role && WOLF_ROLES.includes(p.role) && p.id !== players.find(pp => !pp.isAI)?.id
+                        );
+                        return teammates.length > 0 ? (
+                          <p className="text-[10px] text-destructive/70 mt-1">
+                            🐺 队友：{teammates.map(t => `${t.number}号 ${t.name}`).join('、')}
+                          </p>
+                        ) : null;
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              )}
               {/* Content */}
               <div className="flex-1 overflow-y-auto min-h-0">
                 {renderContent()}
