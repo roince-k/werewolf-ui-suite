@@ -82,7 +82,7 @@ function shouldShowAction(phase: GamePhase, role: Role | null): boolean {
   }
 }
 
-const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip }: NightActionPanelProps) => {
+const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, embedded }: NightActionPanelProps) => {
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [witchAction, setWitchAction] = useState<'save' | 'poison' | null>(null);
 
