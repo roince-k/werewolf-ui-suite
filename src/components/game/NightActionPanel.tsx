@@ -97,7 +97,7 @@ const NightActionPanel = ({ myRole, currentPhase, players, onAction, onSkip, emb
           exit={{ opacity: 0, y: 10 }}
           className={embedded ? 'w-full' : 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[520px]'}
         >
-          <div className="glass-panel rounded-2xl overflow-hidden border border-border/60">
+          <div className={embedded ? '' : 'glass-panel rounded-2xl overflow-hidden border border-border/60'}>
             <div className="flex items-center gap-3 px-5 py-5 justify-center">
               <Clock className="w-5 h-5 text-muted-foreground animate-pulse" />
               <div className="text-center">
