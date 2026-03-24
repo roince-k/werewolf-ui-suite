@@ -9,14 +9,13 @@ import {
 
 import { useGameStore, type GamePhase, type GameLog, type Role, type AgentTemplate } from '@/store/gameStore';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
-import NoteDrawer from '@/components/game/NoteDrawer';
 import PlayerSeat from '@/components/game/PlayerSeat';
 import GameBulletin from '@/components/game/GameBulletin';
 import PhaseBanner from '@/components/game/PhaseBanner';
-import NightActionPanel, { type NightAction } from '@/components/game/NightActionPanel';
+import type { NightAction } from '@/components/game/NightActionPanel';
 import InviteModal from '@/components/game/InviteModal';
 import WolfExplodeButton from '@/components/game/WolfExplodeButton';
-import SheriffElection from '@/components/game/SheriffElection';
+import ActionDrawer from '@/components/game/ActionDrawer';
 import { useGameEngine } from '@/hooks/useGameEngine';
 
 // TODO: MOCK DATA — 替换为真实游戏日志（从游戏引擎/后端获取）
