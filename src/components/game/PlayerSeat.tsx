@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Vote, Skull, Crown, Bot, Mic, UserCheck, X, Shield, Ghost, Crosshair, Heart, Eye, Star, Swords as SwordsIcon } from 'lucide-react';
 import type { Player, GamePhase, Role } from '@/store/gameStore';
+import RoleCardFlip from './RoleCardFlip';
 
 interface PlayerSeatProps {
   player: Player;
@@ -39,6 +40,7 @@ const PlayerSeat = ({
   pickerDirection = 'up', onVote, onInspect, onSetLocalGuess,
 }: PlayerSeatProps) => {
   const [showGuessPicker, setShowGuessPicker] = useState(false);
+  const [showRoleFlip, setShowRoleFlip] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
   const isDead = player.status === 'dead';
   const isVoting = gamePhase === 'voting';
@@ -120,9 +122,20 @@ const PlayerSeat = ({
         </motion.div>
       )}
 
+      {/* Role flip overlay for self */}
+      {isSelf && selfRole && (
+        <RoleCardFlip role={selfRole} isOpen={showRoleFlip} onClose={() => setShowRoleFlip(false)} />
+      )}
+
       {/* Main card */}
       <motion.div
-        onClick={onInspect}
+        onClick={() => {
+          if (isSelf && selfRole && gamePhase !== 'waiting' && gamePhase !== 'ended') {
+            setShowRoleFlip(true);
+          } else {
+            onInspect();
+          }
+        }}
         whileHover={isDead ? {} : { y: -6 }}
         whileTap={isDead ? {} : { scale: 0.97 }}
         className={`relative w-[clamp(108px,10vw,150px)] cursor-pointer select-none transition-all duration-300 ${
