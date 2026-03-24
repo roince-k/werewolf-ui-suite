@@ -32,10 +32,10 @@ const SheriffElection = ({
   if (phase === 'transfer' && isSelfSheriff) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 30 }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[480px]"
+        exit={{ opacity: 0, y: 10 }}
+        className={embedded ? 'w-full' : 'fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-[480px]'}
       >
         <div className="glass-panel rounded-2xl overflow-hidden border border-gold/30">
           <div className="flex items-center gap-3 px-5 py-4 border-b border-border/40 bg-gold/5">
