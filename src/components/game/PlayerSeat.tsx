@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Vote, Skull, Crown, Bot, Mic, UserCheck, X, Shield, Ghost, Crosshair, Heart, Eye, Star, Swords as SwordsIcon } from 'lucide-react';
 import type { Player, GamePhase, Role } from '@/store/gameStore';
+import RoleCardFlip from './RoleCardFlip';
 
 interface PlayerSeatProps {
   player: Player;
