@@ -45,7 +45,6 @@ const Room = () => {
   const { startGame, clearTimers } = useGameEngine();
   const [message, setMessage] = useState('');
   const [showInvite, setShowInvite] = useState(false);
-  const [showInvite, setShowInvite] = useState(false);
   const [inviteSeatNumber, setInviteSeatNumber] = useState<number | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
