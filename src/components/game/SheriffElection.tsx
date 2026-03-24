@@ -21,7 +21,7 @@ export interface SheriffElectionProps {
 
 const SheriffElection = ({
   phase, players, candidates, withdrawnCandidates, currentSpeaker,
-  isSelfCandidate, isSelfSheriff, onNominate, onWithdraw, onVote, onTransfer, onDestroy,
+  isSelfCandidate, isSelfSheriff, onNominate, onWithdraw, onVote, onTransfer, onDestroy, embedded,
 }: SheriffElectionProps) => {
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
 
