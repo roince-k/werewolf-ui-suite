@@ -437,6 +437,9 @@ const Room = () => {
         onWolfExplode={handleWolfExplode}
       />
 
+      {/* Game End */}
+      {gameResult && <GameEndOverlay />}
+
       {/* Rules Dropdown */}
       <AnimatePresence>
         {showRules && (
