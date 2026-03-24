@@ -44,7 +44,7 @@ const Room = () => {
   } = useGameStore();
   const { startGame, clearTimers } = useGameEngine();
   const [message, setMessage] = useState('');
-  const [showNotes, setShowNotes] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteSeatNumber, setInviteSeatNumber] = useState<number | null>(null);
   const [showRules, setShowRules] = useState(false);
