@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Hand, X, Check, Vote, Crown, Trash2 } from 'lucide-react';
 import type { Player } from '@/store/gameStore';
 
-interface SheriffElectionProps {
+export interface SheriffElectionProps {
   phase: 'nominate' | 'speech' | 'vote' | 'transfer';
   players: Player[];
   candidates: number[]; // player numbers who nominated
@@ -16,6 +16,7 @@ interface SheriffElectionProps {
   onVote: (targetNumber: number) => void;
   onTransfer: (targetNumber: number) => void;
   onDestroy: () => void;
+  embedded?: boolean;
 }
 
 const SheriffElection = ({

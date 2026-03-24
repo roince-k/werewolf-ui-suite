@@ -9,6 +9,7 @@ interface NightActionPanelProps {
   players: Player[];
   onAction: (action: NightAction) => void;
   onSkip: () => void;
+  embedded?: boolean;
 }
 
 export interface NightAction {
