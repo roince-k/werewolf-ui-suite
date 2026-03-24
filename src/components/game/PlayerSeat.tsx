@@ -122,9 +122,20 @@ const PlayerSeat = ({
         </motion.div>
       )}
 
+      {/* Role flip overlay for self */}
+      {isSelf && selfRole && (
+        <RoleCardFlip role={selfRole} isOpen={showRoleFlip} onClose={() => setShowRoleFlip(false)} />
+      )}
+
       {/* Main card */}
       <motion.div
-        onClick={onInspect}
+        onClick={() => {
+          if (isSelf && selfRole && gamePhase !== 'waiting' && gamePhase !== 'ended') {
+            setShowRoleFlip(true);
+          } else {
+            onInspect();
+          }
+        }}
         whileHover={isDead ? {} : { y: -6 }}
         whileTap={isDead ? {} : { scale: 0.97 }}
         className={`relative w-[clamp(108px,10vw,150px)] cursor-pointer select-none transition-all duration-300 ${
