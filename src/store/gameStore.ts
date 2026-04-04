@@ -254,6 +254,7 @@ export const useGameStore = create<GameState>((set) => ({
   currentRoom: null,
   myPlayerId: null,
   isReady: false,
+  isSpectator: false,
   gamePhase: 'waiting',
   currentDay: 1,
   myRole: null,
