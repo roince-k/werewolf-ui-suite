@@ -14,7 +14,7 @@ const FILTERS = [
 
 const WerewolfLobby = () => {
   const navigate = useNavigate();
-  const { currentUser, rooms, lobbyUsers, roomFilter, setRoomFilter, joinRoom } = useGameStore();
+  const { currentUser, rooms, lobbyUsers, roomFilter, setRoomFilter, joinRoom, joinRoomAsSpectator } = useGameStore();
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -27,6 +27,12 @@ const WerewolfLobby = () => {
 
   const handleJoinRoom = (roomId: string) => {
     joinRoom(roomId);
+    navigate('/room');
+  };
+
+  const handleSpectateRoom = (roomId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    joinRoomAsSpectator(roomId);
     navigate('/room');
   };
 
