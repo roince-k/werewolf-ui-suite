@@ -221,6 +221,8 @@ const Room = () => {
     toast.success(`已移出 ${target?.name || '玩家'}`);
   };
 
+  const isRoomOwner = currentRoom?.ownerId === myPlayerId;
+
   const renderSeat = (player: typeof allSeats[number], i: number, isTopRow: boolean) => {
     if (player) {
       const isSelf = player.id === myPlayerId;
@@ -236,9 +238,11 @@ const Room = () => {
           localGuess={localGuesses[player.id] || null}
           gameEnded={gamePhase === 'ended'}
           pickerDirection={isTopRow ? 'down' : 'up'}
+          isOwner={isRoomOwner}
           onVote={() => handleVote(player.number)}
           onInspect={() => setInspectedPlayer(player.number)}
           onSetLocalGuess={(role) => setLocalGuess(player.id, role)}
+          onKick={handleKickPlayer}
         />
       );
     }
