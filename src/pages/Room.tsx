@@ -41,7 +41,8 @@ const Room = () => {
     currentRoom, isReady, setReady, gamePhase, setGamePhase,
     gameLogs, addGameLog, myRole, showRoleReveal, setShowRoleReveal,
     gameResult, setGameResult, castVote, notes, setNotes, isSoloMode,
-    addPlayerToRoom, localGuesses, setLocalGuess, sheriffId, myPlayerId,
+    addPlayerToRoom, removePlayerFromRoom, localGuesses, setLocalGuess,
+    sheriffId, myPlayerId, isSpectator,
   } = useGameStore();
   const { startGame, clearTimers } = useGameEngine();
   const [message, setMessage] = useState('');
