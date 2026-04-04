@@ -196,6 +196,9 @@ export interface GameState {
   setGameResult: (result: GameState['gameResult']) => void;
   castVote: (targetNumber: number) => void;
   addPlayerToRoom: (player: Player) => void;
+  removePlayerFromRoom: (playerId: string) => void;
+  joinRoomAsSpectator: (roomId: string) => void;
+  isSpectator: boolean;
   addAgentTemplate: (agent: Omit<AgentTemplate, 'id'>) => void;
   removeAgentTemplate: (id: string) => void;
   selectAgent: (id: string) => void;
