@@ -214,6 +214,13 @@ const Room = () => {
     toast.success(`已邀请 ${username}`);
   };
 
+  const handleKickPlayer = (playerId: string) => {
+    const target = players.find(p => p.id === playerId);
+    removePlayerFromRoom(playerId);
+    addGameLog({ type: 'system', content: `🚫 ${target?.name || '玩家'} 已被移出房间` });
+    toast.success(`已移出 ${target?.name || '玩家'}`);
+  };
+
   const renderSeat = (player: typeof allSeats[number], i: number, isTopRow: boolean) => {
     if (player) {
       const isSelf = player.id === myPlayerId;
