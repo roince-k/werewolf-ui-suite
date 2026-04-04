@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Send, UserPlus, BookOpen, MoreHorizontal,
-  StickyNote, Clock, Shield, Skull, Swords, Moon, Sun
+  StickyNote, Clock, Shield, Skull, Swords, Moon, Sun, Eye
 } from 'lucide-react';
+import { AutoGrowTextarea } from '@/components/ui/auto-grow-textarea';
 
 import { useGameStore, type GamePhase, type GameLog, type Role, type AgentTemplate } from '@/store/gameStore';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
@@ -40,7 +41,8 @@ const Room = () => {
     currentRoom, isReady, setReady, gamePhase, setGamePhase,
     gameLogs, addGameLog, myRole, showRoleReveal, setShowRoleReveal,
     gameResult, setGameResult, castVote, notes, setNotes, isSoloMode,
-    addPlayerToRoom, localGuesses, setLocalGuess, sheriffId, myPlayerId,
+    addPlayerToRoom, removePlayerFromRoom, localGuesses, setLocalGuess,
+    sheriffId, myPlayerId, isSpectator,
   } = useGameStore();
   const { startGame, clearTimers } = useGameEngine();
   const [message, setMessage] = useState('');
@@ -212,6 +214,15 @@ const Room = () => {
     toast.success(`已邀请 ${username}`);
   };
 
+  const handleKickPlayer = (playerId: string) => {
+    const target = players.find(p => p.id === playerId);
+    removePlayerFromRoom(playerId);
+    addGameLog({ type: 'system', content: `🚫 ${target?.name || '玩家'} 已被移出房间` });
+    toast.success(`已移出 ${target?.name || '玩家'}`);
+  };
+
+  const isRoomOwner = currentRoom?.ownerId === myPlayerId;
+
   const renderSeat = (player: typeof allSeats[number], i: number, isTopRow: boolean) => {
     if (player) {
       const isSelf = player.id === myPlayerId;
@@ -227,9 +238,11 @@ const Room = () => {
           localGuess={localGuesses[player.id] || null}
           gameEnded={gamePhase === 'ended'}
           pickerDirection={isTopRow ? 'down' : 'up'}
+          isOwner={isRoomOwner}
           onVote={() => handleVote(player.number)}
           onInspect={() => setInspectedPlayer(player.number)}
           onSetLocalGuess={(role) => setLocalGuess(player.id, role)}
+          onKick={handleKickPlayer}
         />
       );
     }
@@ -277,7 +290,11 @@ const Room = () => {
             ⭐ 警长: {sheriffId}号
           </span>
         )}
-
+        {isSpectator && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted/30 text-muted-foreground border border-border font-medium flex items-center gap-1">
+            <Eye className="w-3 h-3" /> 观战中
+          </span>
+        )}
         <div className="flex-1" />
         <button onClick={() => setInviteSeatNumber(-1)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
           <UserPlus className="w-3.5 h-3.5" /> 邀请
@@ -377,11 +394,11 @@ const Room = () => {
               <StickyNote className="w-3.5 h-3.5 text-gold" />
               <span className="display-title text-xs text-gold tracking-wider">推理笔记</span>
             </div>
-            <textarea
+            <AutoGrowTextarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
               placeholder="记录你的推理和怀疑对象..."
-              className="flex-1 input-ritual text-sm resize-none border-0 rounded-none bg-transparent focus:ring-0 px-4 py-3"
+              className="flex-1 input-ritual text-sm border-0 rounded-none bg-transparent focus:ring-0 px-4 py-3 min-h-[80px]"
             />
           </div>
         </aside>

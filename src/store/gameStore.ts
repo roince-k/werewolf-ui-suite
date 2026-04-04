@@ -196,6 +196,9 @@ export interface GameState {
   setGameResult: (result: GameState['gameResult']) => void;
   castVote: (targetNumber: number) => void;
   addPlayerToRoom: (player: Player) => void;
+  removePlayerFromRoom: (playerId: string) => void;
+  joinRoomAsSpectator: (roomId: string) => void;
+  isSpectator: boolean;
   addAgentTemplate: (agent: Omit<AgentTemplate, 'id'>) => void;
   removeAgentTemplate: (id: string) => void;
   selectAgent: (id: string) => void;
@@ -251,6 +254,7 @@ export const useGameStore = create<GameState>((set) => ({
   currentRoom: null,
   myPlayerId: null,
   isReady: false,
+  isSpectator: false,
   gamePhase: 'waiting',
   currentDay: 1,
   myRole: null,
@@ -313,7 +317,7 @@ export const useGameStore = create<GameState>((set) => ({
       myPlayerId: state.currentUser?.id || 'me',
     };
   }),
-  leaveRoom: () => set({ currentRoom: null, myPlayerId: null, isReady: false, gamePhase: 'waiting', gameLogs: [], myRole: null, localGuesses: {}, sheriffId: null }),
+  leaveRoom: () => set({ currentRoom: null, myPlayerId: null, isReady: false, isSpectator: false, gamePhase: 'waiting', gameLogs: [], myRole: null, localGuesses: {}, sheriffId: null }),
   setReady: (ready) => set({ isReady: ready }),
   setGamePhase: (phase) => set({ gamePhase: phase }),
   addGameLog: (log) => set((state) => ({
@@ -336,6 +340,22 @@ export const useGameStore = create<GameState>((set) => ({
         players: [...state.currentRoom.players, player].sort((a, b) => a.number - b.number),
       },
     };
+  }),
+  // TODO: MOCK DATA — 踢出玩家操作，需替换为 WebSocket 事件通知（KICK_PLAYER）
+  removePlayerFromRoom: (playerId) => set((state) => {
+    if (!state.currentRoom) return {};
+    return {
+      currentRoom: {
+        ...state.currentRoom,
+        players: state.currentRoom.players.filter(p => p.id !== playerId),
+      },
+    };
+  }),
+  // TODO: MOCK DATA — 观战模式，需替换为后端观战房间状态
+  joinRoomAsSpectator: (roomId) => set((state) => {
+    const room = state.rooms.find(r => r.id === roomId);
+    if (!room) return {};
+    return { currentRoom: room, myPlayerId: null, isSpectator: true };
   }),
   addAgentTemplate: (agent) => set((state) => ({
     agentTemplates: [...state.agentTemplates, { ...agent, id: crypto.randomUUID() }],

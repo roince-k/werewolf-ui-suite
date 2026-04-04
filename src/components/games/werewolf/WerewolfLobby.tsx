@@ -14,7 +14,7 @@ const FILTERS = [
 
 const WerewolfLobby = () => {
   const navigate = useNavigate();
-  const { currentUser, rooms, lobbyUsers, roomFilter, setRoomFilter, joinRoom } = useGameStore();
+  const { currentUser, rooms, lobbyUsers, roomFilter, setRoomFilter, joinRoom, joinRoomAsSpectator } = useGameStore();
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [search, setSearch] = useState('');
 
@@ -27,6 +27,12 @@ const WerewolfLobby = () => {
 
   const handleJoinRoom = (roomId: string) => {
     joinRoom(roomId);
+    navigate('/room');
+  };
+
+  const handleSpectateRoom = (roomId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    joinRoomAsSpectator(roomId);
     navigate('/room');
   };
 
@@ -116,17 +122,26 @@ const WerewolfLobby = () => {
                 <span className="text-accent tabular-nums">
                   {room.players.length}/{room.maxPlayers} 玩家
                 </span>
-                <div className="flex -space-x-1">
-                  {room.players.slice(0, 5).map(p => (
-                    <span key={p.id} className="w-6 h-6 rounded-full bg-surface-elevated border border-border flex items-center justify-center text-xs">
-                      {p.emoji}
-                    </span>
-                  ))}
-                  {room.players.length > 5 && (
-                    <span className="w-6 h-6 rounded-full bg-surface-elevated border border-border flex items-center justify-center text-xs text-muted-foreground">
-                      +{room.players.length - 5}
-                    </span>
-                  )}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => handleSpectateRoom(room.id, e)}
+                    className="text-[10px] px-2 py-1 rounded-md bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-border/30 transition-colors flex items-center gap-1"
+                    title="观战"
+                  >
+                    👁️ 观战
+                  </button>
+                  <div className="flex -space-x-1">
+                    {room.players.slice(0, 5).map(p => (
+                      <span key={p.id} className="w-6 h-6 rounded-full bg-surface-elevated border border-border flex items-center justify-center text-xs">
+                        {p.emoji}
+                      </span>
+                    ))}
+                    {room.players.length > 5 && (
+                      <span className="w-6 h-6 rounded-full bg-surface-elevated border border-border flex items-center justify-center text-xs text-muted-foreground">
+                        +{room.players.length - 5}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>

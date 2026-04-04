@@ -192,3 +192,41 @@ Landing → Auth(登录) → GameHub(选择游戏) → Lobby(大厅/房间列表
     → voting: 投票放逐
     → ended: 结算（GameEndOverlay 身份揭示）
 ```
+
+## 前端优化日志
+
+### v0.x — UI/UX 优化批次
+
+#### 1. 房主踢人功能
+- **改动文件**: `store/gameStore.ts`, `components/game/PlayerSeat.tsx`, `pages/Room.tsx`
+- **改动方式**:
+  - `gameStore.ts`: 新增 `removePlayerFromRoom(playerId)` action，从 `currentRoom.players` 中移除指定玩家
+  - `PlayerSeat.tsx`: 新增 `isOwner` 和 `onKick` props；等待阶段房主可见踢人按钮（`UserMinus` 图标），点击后弹出确认/取消二次确认框
+  - `Room.tsx`: 新增 `handleKickPlayer` 方法，调用 `removePlayerFromRoom` 并显示系统日志和 toast 提示；`renderSeat` 中传递 `isOwner` 和 `onKick`
+
+#### 2. 观战者模式
+- **改动文件**: `store/gameStore.ts`, `components/games/werewolf/WerewolfLobby.tsx`, `pages/Room.tsx`
+- **改动方式**:
+  - `gameStore.ts`: 新增 `isSpectator` 状态和 `joinRoomAsSpectator(roomId)` action，以 `myPlayerId=null` 进入房间
+  - `WerewolfLobby.tsx`: 每个房间卡片新增 "👁️ 观战" 按钮，点击调用 `joinRoomAsSpectator` 并跳转
+  - `Room.tsx`: 顶栏显示 "观战中" 标签（`Eye` 图标）
+
+#### 3. 死亡动画与视觉增强
+- **改动文件**: `components/game/PlayerSeat.tsx`
+- **改动方式**:
+  - 死亡时使用 `motion.div` 包裹整个卡片，通过 `animate` 属性过渡 `opacity: 0.4`, `scale: 0.95`, `filter: grayscale(0.8) saturate(0.3)`，持续 0.6s 平滑过渡
+  - 新增红色斜线扫过动画（`via-destructive/30` 渐变横移），作为死亡瞬间的视觉冲击
+  - 头像区域叠加 X 形交叉线（`bg-destructive/40 rotate-45`）
+  - 死亡后标签文字改为 "💀 已出局"，替代原有的 AI/真人标签
+
+#### 4. 输入框自动扩展
+- **改动文件**: `components/ui/auto-grow-textarea.tsx`（新建）, `pages/Room.tsx`
+- **改动方式**:
+  - 新建 `AutoGrowTextarea` 组件，内部监听 `onChange` 和 `value` 变化，通过 `el.scrollHeight` 动态设置 `height`，最大高度 300px
+  - `Room.tsx` 中推理笔记区域的 `<textarea>` 替换为 `<AutoGrowTextarea>`
+
+#### 5. PlayerSeat 名片视觉增强
+- **改动文件**: `components/game/PlayerSeat.tsx`
+- **改动方式**:
+  - 新增 `AVATAR_GRADIENTS` 数组（12 种渐变色），每个玩家按座位号分配独特的头像背景渐变（`bg-gradient-to-br from-xxx/30 to-xxx/30`）
+  - 头像容器从纯色背景改为渐变背景，增强视觉区分度和卡片层次感
