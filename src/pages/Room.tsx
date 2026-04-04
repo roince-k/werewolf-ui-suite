@@ -294,7 +294,7 @@ const Room = () => {
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted/30 text-muted-foreground border border-border font-medium flex items-center gap-1">
             <Eye className="w-3 h-3" /> 观战中
           </span>
-
+        )}
         <div className="flex-1" />
         <button onClick={() => setInviteSeatNumber(-1)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
           <UserPlus className="w-3.5 h-3.5" /> 邀请
