@@ -394,11 +394,11 @@ const Room = () => {
               <StickyNote className="w-3.5 h-3.5 text-gold" />
               <span className="display-title text-xs text-gold tracking-wider">推理笔记</span>
             </div>
-            <textarea
+            <AutoGrowTextarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
               placeholder="记录你的推理和怀疑对象..."
-              className="flex-1 input-ritual text-sm resize-none border-0 rounded-none bg-transparent focus:ring-0 px-4 py-3"
+              className="flex-1 input-ritual text-sm border-0 rounded-none bg-transparent focus:ring-0 px-4 py-3 min-h-[80px]"
             />
           </div>
         </aside>
