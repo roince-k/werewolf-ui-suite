@@ -341,6 +341,22 @@ export const useGameStore = create<GameState>((set) => ({
       },
     };
   }),
+  // TODO: MOCK DATA — 踢出玩家操作，需替换为 WebSocket 事件通知（KICK_PLAYER）
+  removePlayerFromRoom: (playerId) => set((state) => {
+    if (!state.currentRoom) return {};
+    return {
+      currentRoom: {
+        ...state.currentRoom,
+        players: state.currentRoom.players.filter(p => p.id !== playerId),
+      },
+    };
+  }),
+  // TODO: MOCK DATA — 观战模式，需替换为后端观战房间状态
+  joinRoomAsSpectator: (roomId) => set((state) => {
+    const room = state.rooms.find(r => r.id === roomId);
+    if (!room) return {};
+    return { currentRoom: room, myPlayerId: null, isSpectator: true };
+  }),
   addAgentTemplate: (agent) => set((state) => ({
     agentTemplates: [...state.agentTemplates, { ...agent, id: crypto.randomUUID() }],
   })),
