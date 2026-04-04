@@ -317,7 +317,7 @@ export const useGameStore = create<GameState>((set) => ({
       myPlayerId: state.currentUser?.id || 'me',
     };
   }),
-  leaveRoom: () => set({ currentRoom: null, myPlayerId: null, isReady: false, gamePhase: 'waiting', gameLogs: [], myRole: null, localGuesses: {}, sheriffId: null }),
+  leaveRoom: () => set({ currentRoom: null, myPlayerId: null, isReady: false, isSpectator: false, gamePhase: 'waiting', gameLogs: [], myRole: null, localGuesses: {}, sheriffId: null }),
   setReady: (ready) => set({ isReady: ready }),
   setGamePhase: (phase) => set({ gamePhase: phase }),
   addGameLog: (log) => set((state) => ({
