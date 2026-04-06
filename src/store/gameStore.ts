@@ -1,6 +1,19 @@
 import { create } from 'zustand';
 
-export type Role = 'werewolf' | 'white_wolf_king' | 'seer' | 'witch' | 'hunter' | 'guard' | 'villager';
+// Good faction - Civilian
+export type CivilianRole = 'villager' | 'little_sheep';
+// Good faction - God roles
+export type GodRole = 'seer' | 'witch' | 'hunter' | 'guard' | 'idiot' | 'knight' | 'grave_keeper'
+  | 'dream_weaver' | 'medium' | 'magician' | 'night_watchman' | 'moon_priestess'
+  | 'bomber' | 'crow' | 'old_drunkard' | 'rooster' | 'penguin' | 'bear' | 'thick_wolf_skin';
+// Wolf faction
+export type WolfRole = 'werewolf' | 'white_wolf_king' | 'black_wolf_king' | 'wolf_beauty'
+  | 'hidden_wolf' | 'snow_wolf' | 'gargoyle' | 'mech_wolf' | 'shadow_lock'
+  | 'evil_knight' | 'blood_apostle' | 'eclipse_wolf' | 'wolf_crow' | 'wolf_witch' | 'wolf_king';
+// Neutral faction
+export type NeutralRole = 'cupid' | 'lover' | 'thief_master' | 'wild_child' | 'thief'
+  | 'little_girl' | 'shapeshifter' | 'hate_hunter';
+export type Role = CivilianRole | GodRole | WolfRole | NeutralRole;
 export type GamePhase =
   | 'waiting'
   | 'night' | 'night_werewolf' | 'night_seer' | 'night_witch' | 'night_guard'

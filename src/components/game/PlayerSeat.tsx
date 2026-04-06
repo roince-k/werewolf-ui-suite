@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Vote, Skull, Crown, Bot, Mic, UserCheck, X, Shield, Ghost, Crosshair, Heart, Eye, Star, Swords as SwordsIcon, UserMinus } from 'lucide-react';
+import { Vote, Skull, Crown, Bot, Mic, UserCheck, X, Star, Swords as SwordsIcon, UserMinus } from 'lucide-react';
 import type { Player, GamePhase, Role } from '@/store/gameStore';
 import RoleCardFlip from './RoleCardFlip';
+import { ROLE_DATA, GUESS_ROLES } from '@/lib/roleData';
 
 interface PlayerSeatProps {
   player: Player;
@@ -21,18 +22,6 @@ interface PlayerSeatProps {
   onSetLocalGuess: (role: Role | null) => void;
   onKick?: (playerId: string) => void;
 }
-
-const ROLE_CONFIG: Record<Role, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
-  werewolf: { label: '狼人', icon: <Ghost className="w-3 h-3" />, color: 'text-destructive', bg: 'bg-destructive/15 border-destructive/30' },
-  white_wolf_king: { label: '白狼王', icon: <Ghost className="w-3 h-3" />, color: 'text-destructive', bg: 'bg-destructive/15 border-destructive/30' },
-  seer: { label: '预言家', icon: <Eye className="w-3 h-3" />, color: 'text-accent', bg: 'bg-accent/15 border-accent/30' },
-  witch: { label: '女巫', icon: <Heart className="w-3 h-3" />, color: 'text-purple-400', bg: 'bg-purple-400/15 border-purple-400/30' },
-  hunter: { label: '猎人', icon: <Crosshair className="w-3 h-3" />, color: 'text-gold', bg: 'bg-gold/15 border-gold/30' },
-  guard: { label: '守卫', icon: <Shield className="w-3 h-3" />, color: 'text-blue-400', bg: 'bg-blue-400/15 border-blue-400/30' },
-  villager: { label: '平民', icon: <Shield className="w-3 h-3" />, color: 'text-muted-foreground', bg: 'bg-muted/30 border-muted-foreground/20' },
-};
-
-const GUESS_ROLES: Role[] = ['villager', 'werewolf', 'white_wolf_king', 'seer', 'witch', 'hunter', 'guard'];
 
 // Generated gradient avatars based on player number for visual distinction
 const AVATAR_GRADIENTS = [
@@ -331,9 +320,9 @@ const PlayerSeat = ({
             {/* Self role display */}
             {displayRole && (
               <div className="px-2.5 pb-1.5">
-                <div className={`w-full flex items-center justify-center gap-1.5 text-[10px] font-semibold py-1.5 rounded-lg border ${ROLE_CONFIG[displayRole].bg} ${ROLE_CONFIG[displayRole].color}`}>
-                  {ROLE_CONFIG[displayRole].icon}
-                  {ROLE_CONFIG[displayRole].label}
+                <div className={`w-full flex items-center justify-center gap-1.5 text-[10px] font-semibold py-1.5 rounded-lg border ${ROLE_DATA[displayRole].bg} ${ROLE_DATA[displayRole].color}`}>
+                  <span className="text-xs">{ROLE_DATA[displayRole].emoji}</span>
+                  {ROLE_DATA[displayRole].label}
                   {isSelf && <span className="text-[8px] opacity-60">（你）</span>}
                 </div>
               </div>
@@ -351,12 +340,12 @@ const PlayerSeat = ({
                           ? guessCorrect
                             ? 'bg-alive/15 border-alive/40 text-alive'
                             : 'bg-destructive/15 border-destructive/40 text-destructive'
-                          : `${ROLE_CONFIG[localGuess].bg} ${ROLE_CONFIG[localGuess].color}`
+                          : `${ROLE_DATA[localGuess].bg} ${ROLE_DATA[localGuess].color}`
                       }`}
                     >
                       {gameEnded && (guessCorrect ? '✓' : '✗')}
-                      {ROLE_CONFIG[localGuess].icon}
-                      {ROLE_CONFIG[localGuess].label}
+                      <span className="text-xs">{ROLE_DATA[localGuess].emoji}</span>
+                      {ROLE_DATA[localGuess].label}
                       {!gameEnded && <X className="w-2.5 h-2.5 ml-0.5 opacity-50" />}
                     </button>
                   ) : (
@@ -380,7 +369,7 @@ const PlayerSeat = ({
                       >
                         <p className="text-[9px] text-muted-foreground/60 px-2 py-1 font-medium">猜测身份</p>
                         {GUESS_ROLES.map((role) => {
-                          const cfg = ROLE_CONFIG[role];
+                          const cfg = ROLE_DATA[role];
                           return (
                             <button
                               key={role}
@@ -391,7 +380,7 @@ const PlayerSeat = ({
                               }}
                               className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11px] font-medium transition-colors hover:bg-muted/50 ${cfg.color}`}
                             >
-                              {cfg.icon}
+                              <span className="text-xs">{cfg.emoji}</span>
                               {cfg.label}
                             </button>
                           );

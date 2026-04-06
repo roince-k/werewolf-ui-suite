@@ -24,13 +24,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-const ROLE_LABELS: Record<Role, string> = {
-  werewolf: '狼人', white_wolf_king: '白狼王',
-  seer: '预言家', witch: '女巫', hunter: '猎人', guard: '守卫',
-  villager: '平民',
-};
-
-const WOLF_ROLES: Role[] = ['werewolf', 'white_wolf_king'];
+import { ROLE_LABELS, WOLF_ROLES } from '@/lib/roleData';
 
 export function useGameEngine() {
   const store = useGameStore();
