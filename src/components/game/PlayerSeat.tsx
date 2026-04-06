@@ -320,9 +320,9 @@ const PlayerSeat = ({
             {/* Self role display */}
             {displayRole && (
               <div className="px-2.5 pb-1.5">
-                <div className={`w-full flex items-center justify-center gap-1.5 text-[10px] font-semibold py-1.5 rounded-lg border ${ROLE_CONFIG[displayRole].bg} ${ROLE_CONFIG[displayRole].color}`}>
-                  {ROLE_CONFIG[displayRole].icon}
-                  {ROLE_CONFIG[displayRole].label}
+                <div className={`w-full flex items-center justify-center gap-1.5 text-[10px] font-semibold py-1.5 rounded-lg border ${ROLE_DATA[displayRole].bg} ${ROLE_DATA[displayRole].color}`}>
+                  <span className="text-xs">{ROLE_DATA[displayRole].emoji}</span>
+                  {ROLE_DATA[displayRole].label}
                   {isSelf && <span className="text-[8px] opacity-60">（你）</span>}
                 </div>
               </div>
@@ -340,12 +340,12 @@ const PlayerSeat = ({
                           ? guessCorrect
                             ? 'bg-alive/15 border-alive/40 text-alive'
                             : 'bg-destructive/15 border-destructive/40 text-destructive'
-                          : `${ROLE_CONFIG[localGuess].bg} ${ROLE_CONFIG[localGuess].color}`
+                          : `${ROLE_DATA[localGuess].bg} ${ROLE_DATA[localGuess].color}`
                       }`}
                     >
                       {gameEnded && (guessCorrect ? '✓' : '✗')}
-                      {ROLE_CONFIG[localGuess].icon}
-                      {ROLE_CONFIG[localGuess].label}
+                      <span className="text-xs">{ROLE_DATA[localGuess].emoji}</span>
+                      {ROLE_DATA[localGuess].label}
                       {!gameEnded && <X className="w-2.5 h-2.5 ml-0.5 opacity-50" />}
                     </button>
                   ) : (
@@ -369,7 +369,7 @@ const PlayerSeat = ({
                       >
                         <p className="text-[9px] text-muted-foreground/60 px-2 py-1 font-medium">猜测身份</p>
                         {GUESS_ROLES.map((role) => {
-                          const cfg = ROLE_CONFIG[role];
+                          const cfg = ROLE_DATA[role];
                           return (
                             <button
                               key={role}
@@ -380,7 +380,7 @@ const PlayerSeat = ({
                               }}
                               className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-[11px] font-medium transition-colors hover:bg-muted/50 ${cfg.color}`}
                             >
-                              {cfg.icon}
+                              <span className="text-xs">{cfg.emoji}</span>
                               {cfg.label}
                             </button>
                           );
