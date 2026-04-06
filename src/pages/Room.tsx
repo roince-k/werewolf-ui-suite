@@ -257,15 +257,11 @@ const Room = () => {
   };
 
   // Get role info for reveal (data-driven, no hardcoded defaults)
-  const ROLE_REVEAL_CONFIG: Record<Role, { emoji: string; label: string; faction: string; description: string }> = {
-    werewolf: { emoji: '🐺', label: '狼人', faction: '狼人阵营', description: '每晚与同伴商议击杀一名玩家' },
-    white_wolf_king: { emoji: '👑', label: '白狼王', faction: '狼人阵营', description: '白天可自爆并带走一名玩家' },
-    seer: { emoji: '🔮', label: '预言家', faction: '神职阵营', description: '每晚可以查验一名玩家的身份' },
-    witch: { emoji: '🧪', label: '女巫', faction: '神职阵营', description: '拥有解药和毒药各一瓶' },
-    hunter: { emoji: '🏹', label: '猎人', faction: '神职阵营', description: '被淘汰时可开枪带走一人' },
-    guard: { emoji: '🛡️', label: '守卫', faction: '神职阵营', description: '每晚可守护一名玩家免受狼人攻击' },
-    villager: { emoji: '👤', label: '平民', faction: '好人阵营', description: '没有特殊技能，依靠推理和投票' },
-  };
+  const ROLE_REVEAL_CONFIG = Object.fromEntries(
+    Object.entries(
+      (await import('@/lib/roleData')).ROLE_DATA
+    ).map(([k, v]) => [k, { emoji: v.emoji, label: v.label, faction: v.factionLabel, description: v.desc }])
+  ) as Record<Role, { emoji: string; label: string; faction: string; description: string }>;
 
   const roleRevealInfo = myRole ? ROLE_REVEAL_CONFIG[myRole] : null;
 

@@ -1,38 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Vote, Skull, Crown, Bot, Mic, UserCheck, X, Shield, Ghost, Crosshair, Heart, Eye, Star, Swords as SwordsIcon, UserMinus } from 'lucide-react';
+import { Vote, Skull, Crown, Bot, Mic, UserCheck, X, Star, Swords as SwordsIcon, UserMinus } from 'lucide-react';
 import type { Player, GamePhase, Role } from '@/store/gameStore';
 import RoleCardFlip from './RoleCardFlip';
-
-interface PlayerSeatProps {
-  player: Player;
-  index: number;
-  gamePhase: GamePhase;
-  isSelected: boolean;
-  isSpeaking?: boolean;
-  isSelf?: boolean;
-  selfRole?: Role | null;
-  localGuess?: Role | null;
-  gameEnded?: boolean;
-  pickerDirection?: 'up' | 'down';
-  isOwner?: boolean;
-  onVote: () => void;
-  onInspect: () => void;
-  onSetLocalGuess: (role: Role | null) => void;
-  onKick?: (playerId: string) => void;
-}
-
-const ROLE_CONFIG: Record<Role, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
-  werewolf: { label: '狼人', icon: <Ghost className="w-3 h-3" />, color: 'text-destructive', bg: 'bg-destructive/15 border-destructive/30' },
-  white_wolf_king: { label: '白狼王', icon: <Ghost className="w-3 h-3" />, color: 'text-destructive', bg: 'bg-destructive/15 border-destructive/30' },
-  seer: { label: '预言家', icon: <Eye className="w-3 h-3" />, color: 'text-accent', bg: 'bg-accent/15 border-accent/30' },
-  witch: { label: '女巫', icon: <Heart className="w-3 h-3" />, color: 'text-purple-400', bg: 'bg-purple-400/15 border-purple-400/30' },
-  hunter: { label: '猎人', icon: <Crosshair className="w-3 h-3" />, color: 'text-gold', bg: 'bg-gold/15 border-gold/30' },
-  guard: { label: '守卫', icon: <Shield className="w-3 h-3" />, color: 'text-blue-400', bg: 'bg-blue-400/15 border-blue-400/30' },
-  villager: { label: '平民', icon: <Shield className="w-3 h-3" />, color: 'text-muted-foreground', bg: 'bg-muted/30 border-muted-foreground/20' },
-};
-
-const GUESS_ROLES: Role[] = ['villager', 'werewolf', 'white_wolf_king', 'seer', 'witch', 'hunter', 'guard'];
+import { ROLE_DATA, GUESS_ROLES } from '@/lib/roleData';
 
 // Generated gradient avatars based on player number for visual distinction
 const AVATAR_GRADIENTS = [

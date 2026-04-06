@@ -2,6 +2,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Role } from '@/store/gameStore';
 import { ROLE_DATA } from '@/lib/roleData';
 
+interface RoleCardFlipProps {
+  role: Role;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
 const RoleCardFlip = ({ role, isOpen, onClose }: RoleCardFlipProps) => {
   const art = ROLE_DATA[role];
 
