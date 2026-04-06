@@ -9,6 +9,7 @@ import {
 import { AutoGrowTextarea } from '@/components/ui/auto-grow-textarea';
 
 import { useGameStore, type GamePhase, type GameLog, type Role, type AgentTemplate } from '@/store/gameStore';
+import { ROLE_DATA } from '@/lib/roleData';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
 import PlayerSeat from '@/components/game/PlayerSeat';
 import GameBulletin from '@/components/game/GameBulletin';
@@ -258,9 +259,7 @@ const Room = () => {
 
   // Get role info for reveal (data-driven, no hardcoded defaults)
   const ROLE_REVEAL_CONFIG = Object.fromEntries(
-    Object.entries(
-      (await import('@/lib/roleData')).ROLE_DATA
-    ).map(([k, v]) => [k, { emoji: v.emoji, label: v.label, faction: v.factionLabel, description: v.desc }])
+    Object.entries(ROLE_DATA).map(([k, v]) => [k, { emoji: v.emoji, label: v.label, faction: v.factionLabel, description: v.desc }])
   ) as Record<Role, { emoji: string; label: string; faction: string; description: string }>;
 
   const roleRevealInfo = myRole ? ROLE_REVEAL_CONFIG[myRole] : null;
