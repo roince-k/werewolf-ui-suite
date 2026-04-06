@@ -24,9 +24,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-import { ROLE_LABELS, WOLF_ROLES as WOLF_ROLE_LIST } from '@/lib/roleData';
-
-const WOLF_ROLES: Role[] = ['werewolf', 'white_wolf_king'];
+import { ROLE_LABELS, WOLF_ROLES } from '@/lib/roleData';
 
 export function useGameEngine() {
   const store = useGameStore();
