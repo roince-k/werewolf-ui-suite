@@ -5,6 +5,24 @@ import type { Player, GamePhase, Role } from '@/store/gameStore';
 import RoleCardFlip from './RoleCardFlip';
 import { ROLE_DATA, GUESS_ROLES } from '@/lib/roleData';
 
+interface PlayerSeatProps {
+  player: Player;
+  index: number;
+  gamePhase: GamePhase;
+  isSelected: boolean;
+  isSpeaking?: boolean;
+  isSelf?: boolean;
+  selfRole?: Role | null;
+  localGuess?: Role | null;
+  gameEnded?: boolean;
+  pickerDirection?: 'up' | 'down';
+  isOwner?: boolean;
+  onVote: () => void;
+  onInspect: () => void;
+  onSetLocalGuess: (role: Role | null) => void;
+  onKick?: (playerId: string) => void;
+}
+
 // Generated gradient avatars based on player number for visual distinction
 const AVATAR_GRADIENTS = [
   'from-red-500/30 to-orange-500/30',
