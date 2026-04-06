@@ -257,12 +257,16 @@ const Room = () => {
     );
   };
 
-  // Get role info for reveal (data-driven, no hardcoded defaults)
-  const ROLE_REVEAL_CONFIG = Object.fromEntries(
-    Object.entries(ROLE_DATA).map(([k, v]) => [k, { emoji: v.emoji, label: v.label, faction: v.factionLabel, description: v.desc }])
-  ) as Record<Role, { emoji: string; label: string; faction: string; description: string }>;
+  // Role reveal info from centralized data
+  const roleRevealInfo = myRole ? {
+    ...ROLE_DATA[myRole],
+    factionLabel: ROLE_DATA[myRole].factionLabel,
+  } : null;
 
-  const roleRevealInfo = myRole ? ROLE_REVEAL_CONFIG[myRole] : null;
+  // Find wolf teammates for wolf players
+  const wolfTeammates = myRole && WOLF_ROLES.includes(myRole)
+    ? players.filter(p => p.role && WOLF_ROLES.includes(p.role) && p.id !== myPlayerId)
+    : [];
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
