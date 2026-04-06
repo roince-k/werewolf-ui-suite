@@ -9,7 +9,7 @@ import {
 import { AutoGrowTextarea } from '@/components/ui/auto-grow-textarea';
 
 import { useGameStore, type GamePhase, type GameLog, type Role, type AgentTemplate } from '@/store/gameStore';
-import { ROLE_DATA } from '@/lib/roleData';
+import { ROLE_DATA, WOLF_ROLES } from '@/lib/roleData';
 import GameEndOverlay from '@/components/game/GameEndOverlay';
 import PlayerSeat from '@/components/game/PlayerSeat';
 import GameBulletin from '@/components/game/GameBulletin';
@@ -403,7 +403,7 @@ const Room = () => {
         </aside>
       </div>
 
-      {/* Role Reveal — data-driven, no hardcoded role */}
+      {/* Role Reveal — immersive with abilities & teammates */}
       <AnimatePresence>
         {showRoleReveal && roleRevealInfo && (
           <motion.div
@@ -417,15 +417,50 @@ const Room = () => {
               initial={{ scale: 0.8, rotateY: 180 }}
               animate={{ scale: 1, rotateY: 0 }}
               transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
-              className="surface-elevated rounded-2xl p-8 text-center max-w-xs"
+              className={`surface-elevated rounded-2xl p-8 text-center max-w-sm border-2 ${roleRevealInfo.bg}`}
               onClick={e => e.stopPropagation()}
             >
-              <p className="text-sm text-muted-foreground mb-4">你的身份</p>
-              <span className="text-6xl block mb-4">{roleRevealInfo.emoji}</span>
-              <h2 className="display-title text-3xl text-foreground mb-2">{roleRevealInfo.label}</h2>
-              <p className="text-sm text-accent mb-6">{roleRevealInfo.faction}</p>
-              <p className="text-sm text-muted-foreground mb-6">{roleRevealInfo.description}</p>
-              <button onClick={() => setShowRoleReveal(false)} className="btn-ritual text-sm">
+              <p className="text-sm text-muted-foreground mb-3">你的身份</p>
+              <motion.span
+                className="text-6xl block mb-4"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: 2, ease: 'easeInOut' }}
+              >
+                {roleRevealInfo.emoji}
+              </motion.span>
+              <h2 className={`display-title text-3xl mb-2 ${roleRevealInfo.color}`}>{roleRevealInfo.label}</h2>
+              <p className="text-sm text-accent mb-2">{roleRevealInfo.factionLabel}</p>
+              <p className="text-sm text-muted-foreground mb-4">{roleRevealInfo.desc}</p>
+
+              {/* Abilities */}
+              {roleRevealInfo.abilities && roleRevealInfo.abilities.length > 0 && (
+                <div className="text-left mb-4 px-2">
+                  <p className="text-[10px] text-accent font-medium mb-1.5 uppercase tracking-wider">技能</p>
+                  <ul className="space-y-1">
+                    {roleRevealInfo.abilities.map((a, i) => (
+                      <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                        <span className="text-primary mt-0.5">•</span> {a}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Wolf teammates */}
+              {wolfTeammates.length > 0 && (
+                <div className="mb-4 px-3 py-2.5 rounded-xl bg-destructive/10 border border-destructive/20">
+                  <p className="text-[10px] text-destructive font-medium mb-1">🐺 你的狼人队友</p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {wolfTeammates.map(t => (
+                      <span key={t.id} className="text-xs text-destructive/80">
+                        {t.number}号 {t.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button onClick={() => setShowRoleReveal(false)} className="btn-ritual text-sm w-full">
                 我知道了
               </button>
             </motion.div>
