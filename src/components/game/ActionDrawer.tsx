@@ -1,22 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, Ban, Ghost, Eye, Heart, Crosshair, Shield } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Ban } from 'lucide-react';
 import NightActionPanel, { type NightAction } from './NightActionPanel';
 import SheriffElection from './SheriffElection';
 import WolfExplodeButton from './WolfExplodeButton';
 import type { Player, Role, GamePhase } from '@/store/gameStore';
-
-const ROLE_DISPLAY: Record<Role, { label: string; emoji: string; color: string; bg: string }> = {
-  werewolf: { label: '狼人', emoji: '🐺', color: 'text-destructive', bg: 'bg-destructive/10 border-destructive/30' },
-  white_wolf_king: { label: '白狼王', emoji: '👑🐺', color: 'text-destructive', bg: 'bg-destructive/10 border-destructive/30' },
-  seer: { label: '预言家', emoji: '🔮', color: 'text-accent', bg: 'bg-accent/10 border-accent/30' },
-  witch: { label: '女巫', emoji: '🧪', color: 'text-purple-400', bg: 'bg-purple-400/10 border-purple-400/30' },
-  hunter: { label: '猎人', emoji: '🎯', color: 'text-gold', bg: 'bg-gold/10 border-gold/30' },
-  guard: { label: '守卫', emoji: '🛡️', color: 'text-blue-400', bg: 'bg-blue-400/10 border-blue-400/30' },
-  villager: { label: '平民', emoji: '👤', color: 'text-muted-foreground', bg: 'bg-muted/20 border-muted-foreground/20' },
-};
-
-const WOLF_ROLES: Role[] = ['werewolf', 'white_wolf_king'];
+import { ROLE_DATA, WOLF_ROLES } from '@/lib/roleData';
 
 interface ActionDrawerProps {
   gamePhase: GamePhase;
@@ -214,11 +203,11 @@ const ActionDrawer = ({
               {/* Self role display */}
               {myRole && (
                 <div className="px-4 py-3 border-b border-border/30 bg-background/20 shrink-0">
-                  <div className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border ${ROLE_DISPLAY[myRole].bg}`}>
-                    <span className="text-xl">{ROLE_DISPLAY[myRole].emoji}</span>
+                  <div className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border ${ROLE_DATA[myRole].bg}`}>
+                    <span className="text-xl">{ROLE_DATA[myRole].emoji}</span>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-xs font-bold ${ROLE_DISPLAY[myRole].color}`}>
-                        你的身份：{ROLE_DISPLAY[myRole].label}
+                      <p className={`text-xs font-bold ${ROLE_DATA[myRole].color}`}>
+                        你的身份：{ROLE_DATA[myRole].label}
                       </p>
                       {WOLF_ROLES.includes(myRole) && (() => {
                         const teammates = players.filter(

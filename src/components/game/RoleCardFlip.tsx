@@ -1,68 +1,9 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ghost, Eye, Heart, Crosshair, Shield, X } from 'lucide-react';
 import type { Role } from '@/store/gameStore';
-
-interface RoleCardFlipProps {
-  role: Role;
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const ROLE_ART: Record<Role, { label: string; emoji: string; color: string; gradient: string; icon: React.ReactNode; desc: string }> = {
-  werewolf: {
-    label: '狼人', emoji: '🐺',
-    color: 'text-destructive',
-    gradient: 'from-destructive/30 via-destructive/10 to-background',
-    icon: <Ghost className="w-8 h-8" />,
-    desc: '夜晚选择一名玩家袭击',
-  },
-  white_wolf_king: {
-    label: '白狼王', emoji: '👑🐺',
-    color: 'text-destructive',
-    gradient: 'from-destructive/40 via-gold/10 to-background',
-    icon: <Ghost className="w-8 h-8" />,
-    desc: '可自爆并带走一名玩家',
-  },
-  seer: {
-    label: '预言家', emoji: '🔮',
-    color: 'text-accent',
-    gradient: 'from-accent/30 via-accent/10 to-background',
-    icon: <Eye className="w-8 h-8" />,
-    desc: '每晚可查验一名玩家身份',
-  },
-  witch: {
-    label: '女巫', emoji: '🧪',
-    color: 'text-purple-400',
-    gradient: 'from-purple-500/30 via-purple-400/10 to-background',
-    icon: <Heart className="w-8 h-8" />,
-    desc: '持有一瓶解药和一瓶毒药',
-  },
-  hunter: {
-    label: '猎人', emoji: '🎯',
-    color: 'text-gold',
-    gradient: 'from-gold/30 via-gold/10 to-background',
-    icon: <Crosshair className="w-8 h-8" />,
-    desc: '死亡时可开枪带走一人',
-  },
-  guard: {
-    label: '守卫', emoji: '🛡️',
-    color: 'text-blue-400',
-    gradient: 'from-blue-500/30 via-blue-400/10 to-background',
-    icon: <Shield className="w-8 h-8" />,
-    desc: '每晚可守护一名玩家',
-  },
-  villager: {
-    label: '平民', emoji: '👤',
-    color: 'text-muted-foreground',
-    gradient: 'from-muted/40 via-muted/10 to-background',
-    icon: <Shield className="w-8 h-8" />,
-    desc: '通过推理找出狼人',
-  },
-};
+import { ROLE_DATA } from '@/lib/roleData';
 
 const RoleCardFlip = ({ role, isOpen, onClose }: RoleCardFlipProps) => {
-  const art = ROLE_ART[role];
+  const art = ROLE_DATA[role];
 
   return (
     <AnimatePresence>
