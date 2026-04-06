@@ -230,3 +230,37 @@ Landing → Auth(登录) → GameHub(选择游戏) → Lobby(大厅/房间列表
 - **改动方式**:
   - 新增 `AVATAR_GRADIENTS` 数组（12 种渐变色），每个玩家按座位号分配独特的头像背景渐变（`bg-gradient-to-br from-xxx/30 to-xxx/30`）
   - 头像容器从纯色背景改为渐变背景，增强视觉区分度和卡片层次感
+
+#### 6. 全角色系统扩展（基于《狼人杀角色阵营完整手册》）
+
+**新建文件**：
+- `src/lib/roleData.ts` — 角色数据中心，44 个角色的完整展示信息、技能、限制、胜负条件、策略，以及板子配置、夜间行动顺序、术语词典
+
+**改动文件及方式**：
+
+| 文件 | 改动方式 |
+| --- | --- |
+| `store/gameStore.ts` | `Role` 类型从 7 种扩展至 44 种，按好人平民（`CivilianRole`）、好人神职（`GodRole`）、狼人阵营（`WolfRole`）、中立阵营（`NeutralRole`）分类定义 |
+| `lib/roleData.ts`（新建） | 统一的角色数据源 `ROLE_DATA`，包含 `label/emoji/color/bg/gradient/desc/faction/abilities/limitations/winCondition/strategies` 等字段；导出 `WOLF_ROLES`、`CORE_ROLES`、`GUESS_ROLES`、`ROLE_LABELS`、`FACTION_COLORS`、`BOARD_CONFIGS`（含 7 种板子配置）、`NIGHT_ORDER_SUMMARY`、`GLOSSARY` |
+| `components/game/ActionDrawer.tsx` | 移除内联 `ROLE_DISPLAY` 和 `WOLF_ROLES`，改为从 `roleData.ts` 导入 `ROLE_DATA` 和 `WOLF_ROLES` |
+| `components/game/RoleCardFlip.tsx` | 移除内联 `ROLE_ART` 映射（62 行），改为使用 `ROLE_DATA` 中的 `emoji/color/gradient/desc` 字段，自动支持所有 44 个角色的翻牌效果 |
+| `components/game/PlayerSeat.tsx` | 移除内联 `ROLE_CONFIG` 和 `GUESS_ROLES`，改为从 `roleData.ts` 导入；`icon` 字段改为 `emoji` 展示方式 |
+| `hooks/useGameEngine.ts` | 移除内联 `ROLE_LABELS` 和 `WOLF_ROLES`，改为从 `roleData.ts` 导入 |
+| `pages/Room.tsx` | 移除内联 `ROLE_REVEAL_CONFIG`，改为从 `ROLE_DATA` 动态生成 |
+| `components/games/werewolf/WerewolfGuide.tsx` | 完全重写：从 `roleData.ts` 导入所有数据；新增"进阶角色"切换按钮、按阵营分组的角色图鉴、胜负优先级表、冰冻/禁锢效果规则、夜间行动顺序速查表、新增"术语词典"Tab |
+
+**新增角色清单**：
+
+| 阵营 | 新增角色 |
+| --- | --- |
+| 好人·平民 | 小绵羊 |
+| 好人·神职 | 白痴、骑士、守墓人、摄梦人、通灵师、魔术师、守夜人、月夜祭司、炸弹师、乌鸦、老酒鬼、大公鸡、企鹅、熊、厚皮狼 |
+| 狼人阵营 | 狼王、黑狼王、狼美人、隐狼、雪狼、石像鬼、机械狼、禁锢之影、恶灵骑士、血月使徒、蚀时狼妃、狼鸦之爪、狼巫 |
+| 中立阵营 | 丘比特、情侣、盗宝大师、野孩子、盗贼、小女孩、千面人、憎恶猎人 |
+
+**新增板子配置**：
+- 预女猎白板（12人 · 白痴板）
+- 狼美人骑士板（12人进阶）
+- 机械狼板（12人进阶）
+- 黑狼王摄梦人板（12人进阶）
+- 石像鬼守夜人板（12人进阶）
