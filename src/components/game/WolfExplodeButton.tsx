@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bomb, AlertTriangle, Check, X, Crosshair } from 'lucide-react';
 import type { Player, Role } from '@/store/gameStore';
+import { WOLF_ROLES } from '@/lib/roleData';
 
 interface WolfExplodeButtonProps {
   myRole: Role | null;
@@ -14,7 +15,7 @@ const WolfExplodeButton = ({ myRole, players, onExplode }: WolfExplodeButtonProp
   const [showTargetPicker, setShowTargetPicker] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
 
-  if (!myRole || (myRole !== 'werewolf' && myRole !== 'white_wolf_king')) return null;
+  if (!myRole || !WOLF_ROLES.includes(myRole)) return null;
 
   const isWhiteWolfKing = myRole === 'white_wolf_king';
   const alivePlayers = players.filter(p => p.status === 'alive');
